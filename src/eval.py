@@ -11,6 +11,13 @@ from pytorch_lightning import (
 )
 from pytorch_lightning.loggers import LightningLoggerBase
 
+root = pyrootutils.setup_root(
+    search_from=__file__,
+    indicator=[".git", "pyproject.toml"],
+    pythonpath=True,
+    dotenv=True,
+)
+
 from src import utils
 
 # --------------------------------------------------------------------------- #
@@ -43,12 +50,6 @@ from src import utils
 # --------------------------------------------------------------------------- #
 
 
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git", "pyproject.toml"],
-    pythonpath=True,
-    dotenv=True,
-)
 _HYDRA_PARAMS = {
     "version_base": "1.3",
     "config_path": str(root / "configs"),
@@ -81,20 +82,14 @@ def evaluate(cfg: DictConfig) -> Tuple[dict, dict]:
 
     # Init lightning datamodule
     log.info(f"Instantiating datamodule <{cfg.datamodule._target_}>")
-    datamodule: LightningDataModule = hydra.utils.instantiate(
-        cfg.datamodule, _recursive_=False
-    )
+    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.datamodule, _recursive_=False)
 
     # Init lightning model
     log.info(f"Instantiating lightning model <{cfg.module._target_}>")
-    model: LightningModule = hydra.utils.instantiate(
-        cfg.module, _recursive_=False
-    )
+    model: LightningModule = hydra.utils.instantiate(cfg.module, _recursive_=False)
 
     log.info("Instantiating loggers...")
-    logger: List[LightningLoggerBase] = utils.instantiate_loggers(
-        cfg.get("logger")
-    )
+    logger: List[LightningLoggerBase] = utils.instantiate_loggers(cfg.get("logger"))
 
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
     trainer: Trainer = hydra.utils.instantiate(cfg.trainer, logger=logger)
