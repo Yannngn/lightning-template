@@ -79,14 +79,14 @@ def cfg_eval_global() -> DictConfig:
 # this is called by each test which uses `cfg_train` arg
 # each test generates its own temporary logging path
 @pytest.fixture(scope="function")
-def cfg_train(cfg_train_global, tmp_path) -> DictConfig:
+def cfg_train(cfg_train_global, tmp_path) -> DictConfig:  # type: ignore
     cfg = cfg_train_global.copy()
 
     with open_dict(cfg):
         cfg.paths.output_dir = str(tmp_path)
         cfg.paths.log_dir = str(tmp_path)
 
-    yield cfg
+    yield cfg  # type: ignore
 
     GlobalHydra.instance().clear()
 
@@ -94,14 +94,14 @@ def cfg_train(cfg_train_global, tmp_path) -> DictConfig:
 # this is called by each test which uses `cfg_eval` arg
 # each test generates its own temporary logging path
 @pytest.fixture(scope="function")
-def cfg_eval(cfg_eval_global, tmp_path) -> DictConfig:
+def cfg_eval(cfg_eval_global, tmp_path) -> DictConfig:  # type: ignore
     cfg = cfg_eval_global.copy()
 
     with open_dict(cfg):
         cfg.paths.output_dir = str(tmp_path)
         cfg.paths.log_dir = str(tmp_path)
 
-    yield cfg
+    yield cfg  # type: ignore
 
     GlobalHydra.instance().clear()
 

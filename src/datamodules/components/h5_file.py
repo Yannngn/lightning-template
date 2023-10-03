@@ -4,7 +4,7 @@ import os
 import queue
 import weakref
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import h5py
 import numpy as np
@@ -48,9 +48,7 @@ class H5PyFile:
     Thanks to Andrei Stoskii for this module which I slightly reworked.
     """
 
-    def __init__(
-        self, filename: Optional[str] = None, mode: str = "r", **kwargs: Any
-    ) -> None:
+    def __init__(self, filename: Optional[str] = None, mode: str = "r", **kwargs: Any) -> None:
         """H5PyFile module.
 
         Args:
@@ -90,14 +88,14 @@ class H5PyFile:
 
     def __getitem__(self, *args: Any, **kwargs: Any) -> Any:
         self._lazy_load_()
-        return self.dataset.__getitem__(*args, **kwargs)[...]
+        return self.dataset.__getitem__(*args, **kwargs)[...]  # type: ignore
 
     def __setitem__(self, *args: Any, **kwargs: Any) -> Any:
         self._lazy_load_()
-        return self.dataset.__setitem__(*args, **kwargs)
+        return self.dataset.__setitem__(*args, **kwargs)  # type: ignore
 
     def __getstate__(self) -> Tuple[str, str, Dict[str, Any]]:
-        return self.filename, self.mode, self._kwargs
+        return self.filename, self.mode, self._kwargs  # type: ignore
 
     def __setstate__(self, state: Tuple[str, str, Dict[str, Any]]) -> Any:
         return self.__init__(state[0], state[1], **state[2])
@@ -108,17 +106,17 @@ class H5PyFile:
     @classmethod
     def create(
         cls,
-        filename: str,
-        content: List[str],
-        dirname: Optional[str] = None,
+        filename: Union[str, Path],
+        content: List[Union[str, Path]],
+        dirname: Optional[Union[str, Path]] = None,
         verbose: bool = True,
     ) -> None:
         """Create h5py file for dataset from scratch.
 
         Args:
-            filename (str): h5py filename.
-            content (List[str]): Dataset content. Requires List[data filepath].
-            dirname (:obj:`str`, optional): Additional dirname for data filepaths.
+            filename (Union[str, Path]): h5py filename.
+            content (List[Union[str, Path]]): Dataset content. Requires List[data filepath].
+            dirname (:obj:`Union[str, Path]`, optional): Additional dirname for data filepaths.
                 Default to None.
             verbose (bool): Verbose option. If True, it would show tqdm progress bar.
                 Default to True.
@@ -126,9 +124,7 @@ class H5PyFile:
         filename = Path(filename)
         ext = filename.suffix
         if ext != ".h5":
-            raise RuntimeError(
-                f"Expected extension to be '.h5', instead got '{ext}'."
-            )
+            raise RuntimeError(f"Expected extension to be '.h5', instead got '{ext}'.")
         dirname = Path("" if dirname is None else dirname)
         progress_bar = tqdm if verbose else (lambda it, *_, **__: it)
 
@@ -138,9 +134,7 @@ class H5PyFile:
             content,
             n_jobs=128,
         )
-        for filepath, found in progress_bar(
-            generator, desc="Indexing content", total=len(content)
-        ):
+        for filepath, found in progress_bar(generator, desc="Indexing content", total=len(content)):
             if not found:
                 raise FileNotFoundError(filepath)
 
@@ -151,7 +145,5 @@ class H5PyFile:
             n_jobs=128,
         )
         with h5py.File(filename, mode="x") as dataset:
-            for filepath, data in progress_bar(
-                generator, desc="Creating dataset", total=len(content)
-            ):
+            for filepath, data in progress_bar(generator, desc="Creating dataset", total=len(content)):
                 dataset[str(filepath)] = data

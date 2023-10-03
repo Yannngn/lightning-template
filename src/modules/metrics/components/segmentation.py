@@ -31,8 +31,8 @@ class IoU(Metric):
             intersection = gt.logical_and(preds.cpu())
             union = gt.logical_or(preds.cpu())
 
-            self.intersection[index] += intersection.float().sum()
-            self.union[index] += union.float().sum()
+            self.intersection[index] += intersection.float().sum()  # type: ignore
+            self.union[index] += union.float().sum()  # type: ignore
 
     def compute(self) -> torch.Tensor:
-        return self.intersection.sum() / self.union.sum()
+        return self.intersection.sum() / self.union.sum()  # type: ignore

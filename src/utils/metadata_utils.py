@@ -18,7 +18,7 @@ def run_sh_command(cmd: Any, allow_fail: bool = True, **kwargs: Any) -> str:
         )
     except subprocess.SubprocessError as exception:
         if allow_fail:
-            output = f"{exception}\n\n{exception.output}"
+            output = f"{exception}"
         else:
             raise
     return f"> {cmd}\n\n{output}\n"

@@ -37,11 +37,11 @@ class BaseLitModule(LightningModule):
         return self.model.forward(x)
 
     def configure_optimizers(self) -> Any:
-        optimizer: torch.optim = hydra.utils.instantiate(
+        optimizer: torch.optim.Optimizer = hydra.utils.instantiate(
             self.opt_params, params=self.parameters(), _convert_="partial"
         )
         if self.slr_params.get("scheduler"):
-            scheduler: torch.optim.lr_scheduler = hydra.utils.instantiate(
+            scheduler: torch.optim.lr_scheduler._LRScheduler = hydra.utils.instantiate(
                 self.slr_params.scheduler,
                 optimizer=optimizer,
                 _convert_="partial",

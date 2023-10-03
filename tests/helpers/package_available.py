@@ -1,7 +1,7 @@
 import platform
 
 import pkg_resources
-from pytorch_lightning.accelerators import TPUAccelerator
+from pytorch_lightning.accelerators.tpu import TPUAccelerator
 
 
 def _package_available(package_name: str) -> bool:

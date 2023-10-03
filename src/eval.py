@@ -117,11 +117,12 @@ def evaluate(cfg: DictConfig) -> Tuple[dict, dict]:
             datamodule=datamodule,
             ckpt_path=cfg.ckpt_path,
         )
-        utils.save_predictions(
-            predictions=predictions,
-            dirname=cfg.paths.output_dir,
-            **cfg.extras.predictions_saving_params,
-        )
+        if predictions is not None:
+            utils.save_predictions(
+                predictions=predictions,
+                dirname=cfg.paths.output_dir,
+                **cfg.extras.predictions_saving_params,
+            )
 
     else:
         log.info("Starting testing!")

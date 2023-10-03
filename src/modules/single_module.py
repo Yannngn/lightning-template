@@ -46,17 +46,11 @@ class SingleLitModule(BaseLitModule):
             kwargs (Any): Additional keyword arguments for pytorch_lightning.LightningModule.
         """
 
-        super().__init__(
-            network, optimizer, scheduler, logging, *args, **kwargs
-        )
+        super().__init__(network, optimizer, scheduler, logging, *args, **kwargs)
         self.loss = load_loss(network.loss)
-        self.output_activation = hydra.utils.instantiate(
-            network.output_activation, _partial_=True
-        )
+        self.output_activation = hydra.utils.instantiate(network.output_activation, _partial_=True)
 
-        main_metric, valid_metric_best, add_metrics = load_metrics(
-            network.metrics
-        )
+        main_metric, valid_metric_best, add_metrics = load_metrics(network.metrics)
         self.train_metric = main_metric.clone()
         self.train_add_metrics = add_metrics.clone(postfix="/train")
         self.valid_metric = main_metric.clone()
@@ -84,18 +78,18 @@ class SingleLitModule(BaseLitModule):
         self.log(
             f"{self.loss.__class__.__name__}/train",
             loss,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
 
         self.train_metric(preds, targets)
         self.log(
             f"{self.train_metric.__class__.__name__}/train",
             self.train_metric,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
 
         self.train_add_metrics(preds, targets)
-        self.log_dict(self.train_add_metrics, **self.logging_params)
+        self.log_dict(self.train_add_metrics, **self.logging_params)  # type: ignore
 
         # Lightning keeps track of `training_step` outputs and metrics on GPU for
         # optimization purposes. This works well for medium size datasets, but
@@ -118,18 +112,18 @@ class SingleLitModule(BaseLitModule):
         self.log(
             f"{self.loss.__class__.__name__}/valid",
             loss,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
 
         self.valid_metric(preds, targets)
         self.log(
             f"{self.valid_metric.__class__.__name__}/valid",
             self.valid_metric,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
 
         self.valid_add_metrics(preds, targets)
-        self.log_dict(self.valid_add_metrics, **self.logging_params)
+        self.log_dict(self.valid_add_metrics, **self.logging_params)# type: ignore
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def validation_epoch_end(self, outputs: List[Any]) -> None:
@@ -141,32 +135,28 @@ class SingleLitModule(BaseLitModule):
         self.log(
             f"{self.valid_metric.__class__.__name__}/valid_best",
             self.valid_metric_best.compute(),
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
 
     def test_step(self, batch: Any, batch_idx: int) -> Any:
         loss, preds, targets = self.model_step(batch, batch_idx)
-        self.log(
-            f"{self.loss.__class__.__name__}/test", loss, **self.logging_params
-        )
+        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)# type: ignore
 
         self.test_metric(preds, targets)
         self.log(
             f"{self.test_metric.__class__.__name__}/test",
             self.test_metric,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
 
         self.test_add_metrics(preds, targets)
-        self.log_dict(self.test_add_metrics, **self.logging_params)
+        self.log_dict(self.test_add_metrics, **self.logging_params)# type: ignore
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def test_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
-    def predict_step(
-        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
-    ) -> Any:
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         logits = self.forward(batch["image"])
         preds = self.output_activation(logits)
         outputs = {"logits": logits, "preds": preds}
@@ -188,9 +178,7 @@ class MNISTLitModule(SingleLitModule):
         preds = self.output_activation(logits)
         return loss, preds, y
 
-    def predict_step(
-        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
-    ) -> Any:
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         x, y = batch
         logits = self.forward(x["image"])
         preds = self.output_activation(logits)
@@ -223,9 +211,7 @@ class SingleVicRegLitModule(BaseLitModule):
             kwargs (Any): Additional keyword arguments for pytorch_lightning.LightningModule.
         """
 
-        super().__init__(
-            network, optimizer, scheduler, logging, *args, **kwargs
-        )
+        super().__init__(network, optimizer, scheduler, logging, *args, **kwargs)
         self.loss = load_loss(network.loss)
         # projector
         self.projector = nn.Sequential(
@@ -254,7 +240,7 @@ class SingleVicRegLitModule(BaseLitModule):
         self.log(
             f"{self.loss.__class__.__name__}/train",
             loss,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
         return {"loss": loss}
 
@@ -266,7 +252,7 @@ class SingleVicRegLitModule(BaseLitModule):
         self.log(
             f"{self.loss.__class__.__name__}/valid",
             loss,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
         return {"loss": loss}
 
@@ -275,9 +261,7 @@ class SingleVicRegLitModule(BaseLitModule):
 
     def test_step(self, batch: Any, batch_idx: int) -> Any:
         loss = self.model_step(batch, batch_idx)
-        self.log(
-            f"{self.loss.__class__.__name__}/test", loss, **self.logging_params
-        )
+        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)# type: ignore
         return {"loss": loss}
 
     def test_epoch_end(self, outputs: List[Any]) -> None:
@@ -299,14 +283,14 @@ class SingleReIdLitModule(SingleLitModule):
         self.log(
             f"{self.loss.__class__.__name__}/train",
             loss,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
 
         self.train_metric(preds, targets)
         self.log(
             f"{self.train_metric.__class__.__name__}/train",
             self.train_metric,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
         return {"loss": loss}
 
@@ -318,14 +302,14 @@ class SingleReIdLitModule(SingleLitModule):
         self.log(
             f"{self.loss.__class__.__name__}/valid",
             loss,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
 
         self.valid_metric(preds, targets)
         self.log(
             f"{self.valid_metric.__class__.__name__}/valid",
             self.valid_metric,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
         return {"loss": loss, "preds": preds, "targets": targets}
 
@@ -334,21 +318,17 @@ class SingleReIdLitModule(SingleLitModule):
         with torch.no_grad():
             loss, logits = self.loss(embeddings, batch["label"])
         preds = self.output_activation(logits)
-        self.log(
-            f"{self.loss.__class__.__name__}/test", loss, **self.logging_params
-        )
+        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)# type: ignore
 
         self.test_metric(preds, targets)
         self.log(
             f"{self.test_metric.__class__.__name__}/test",
             self.test_metric,
-            **self.logging_params,
+            **self.logging_params,  # type: ignore
         )
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def predict_step(
-        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
-    ) -> Any:
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
         outputs = {"embeddings": self.forward(batch["image"])}
         if "name" in batch:
             outputs.update({"names": batch["name"]})

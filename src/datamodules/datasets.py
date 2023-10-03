@@ -1,7 +1,7 @@
 import json
 import random
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
 import torch
@@ -14,9 +14,9 @@ from src.datamodules.components.parse import parse_image_paths
 class ClassificationDataset(BaseDataset):
     def __init__(
         self,
-        json_path: Optional[str] = None,
-        txt_path: Optional[str] = None,
-        data_path: Optional[str] = None,
+        json_path: Optional[Union[str, Path]] = None,
+        txt_path: Optional[Union[str, Path]] = None,
+        data_path: Optional[Union[str, Path]] = None,
         transforms: Optional[Callable] = None,
         read_mode: str = "pillow",
         to_gray: bool = False,
@@ -43,16 +43,22 @@ class ClassificationDataset(BaseDataset):
         super().__init__(transforms, read_mode, to_gray)
         if (json_path and txt_path) or (not json_path and not txt_path):
             raise ValueError("Requires json_path or txt_path, but not both.")
+
         elif json_path:
             json_path = Path(json_path)
+
             if not json_path.is_file():
                 raise RuntimeError(f"'{json_path}' must be a file.")
+
             with open(json_path) as json_file:
                 self.annotation = json.load(json_file)
-        else:
+
+        elif txt_path:
             txt_path = Path(txt_path)
+
             if not txt_path.is_file():
                 raise RuntimeError(f"'{txt_path}' must be a file.")
+
             self.annotation = {}
             with open(txt_path) as txt_file:
                 for line in txt_file:
@@ -141,9 +147,7 @@ class NoLabelsDataset(BaseDataset):
 
         super().__init__(transforms, read_mode, to_gray)
         if file_paths or dir_paths or txt_paths:
-            self.keys = parse_image_paths(
-                file_paths=file_paths, dir_paths=dir_paths, txt_paths=txt_paths
-            )
+            self.keys = parse_image_paths(file_paths=file_paths, dir_paths=dir_paths, txt_paths=txt_paths)
         elif json_paths:
             self.keys = []
             for json_path in json_paths:

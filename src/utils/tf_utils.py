@@ -13,7 +13,7 @@ def serialize_tf_events(tf_events_file_path: str) -> Any:
         from tensorflow.core.util import event_pb2
 
         for serialized_event in tf.data.TFRecordDataset(tf_events_file_path):
-            event = event_pb2.Event.FromString(serialized_event.numpy())
+            event = event_pb2.Event.FromString(serialized_event.numpy())  # type: ignore
             yield event
     else:
         from tensorflow.python.summary.summary_iterator import summary_iterator
@@ -22,9 +22,7 @@ def serialize_tf_events(tf_events_file_path: str) -> Any:
             yield event
 
 
-def load_tf_events(
-    tf_events_file_path: str, names: List[str]
-) -> Dict[str, Any]:
+def load_tf_events(tf_events_file_path: str, names: List[str]) -> Dict[str, Any]:
     traces = defaultdict(list)
     for event in serialize_tf_events(tf_events_file_path):
         for value in event.summary.value:
@@ -51,8 +49,7 @@ def load_metrics(
     if verbose:
         print(
             f"lead_trace: {lead_trace}:",
-            f"argmax idx: {idx} / {len(lead_trace_value)}, "
-            f"argmax value: {lead_trace_value[idx]}",
+            f"argmax idx: {idx} / {len(lead_trace_value)}, " f"argmax value: {lead_trace_value[idx]}",
         )
         if sub_traces:
             for trace_name in sub_traces:

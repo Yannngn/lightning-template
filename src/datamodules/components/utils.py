@@ -34,7 +34,7 @@ class DatasetFromSampler(Dataset):
         Returns:
             int: length of the dataset
         """
-        return len(self.sampler)
+        return len(self.sampler)  # type: ignore
 
 
 class DistributedSamplerWrapper(DistributedSampler):
@@ -82,4 +82,4 @@ class DistributedSamplerWrapper(DistributedSampler):
         self.dataset = DatasetFromSampler(self.sampler)
         indexes_of_indexes = super().__iter__()
         sub_sampler_indexes = self.dataset
-        return iter(itemgetter(*indexes_of_indexes)(sub_sampler_indexes))
+        return iter(itemgetter(*indexes_of_indexes)(sub_sampler_indexes))  # type: ignore

@@ -25,10 +25,14 @@ def check_grad_cam(
 
     batch = next(iter(dataloader))
     images, labels = batch["image"], batch["label"]
-    grad_cam.batch_size = len(images)
+
+    setattr(grad_cam, "batch_size", len(images))
+
     logits = model.forward(images)
+
     if dataloader_idx:
         logits = logits[dataloader_idx]
+
     logits = logits.squeeze(1)
     pred = logits.sigmoid().detach().cpu().numpy() * 100
     labels = labels.cpu().numpy()
@@ -41,12 +45,11 @@ def check_grad_cam(
     images = images.detach().cpu().numpy().transpose(0, 2, 3, 1)
     images -= images.min()
     images /= images.max()
+
     return images, grayscale_cam, pred, labels
 
 
-def reshape_transform(
-    tensor: torch.Tensor, height: int = 7, width: int = 7
-) -> torch.Tensor:
+def reshape_transform(tensor: torch.Tensor, height: int = 7, width: int = 7) -> torch.Tensor:
     """GradCam reshape_transform for ViT."""
     result = tensor.reshape(tensor.size(0), height, width, tensor.size(2))
 
@@ -55,14 +58,10 @@ def reshape_transform(
     return result
 
 
-def grad_cam_visualizer(
-    grad_cam_outputs: Tuple[Any], figsize: Tuple[int, int] = (20, 20)
-) -> None:
+def grad_cam_visualizer(grad_cam_outputs: Tuple[Any], figsize: Tuple[int, int] = (20, 20)) -> None:
     """GradCam output visualizer."""
     plt.figure(figsize=figsize)
-    for i, (image, grayscale_cam, pred, label) in enumerate(
-        zip(grad_cam_outputs)
-    ):
+    for i, (image, grayscale_cam, pred, label) in enumerate(zip(grad_cam_outputs)):  # type: ignore
         plt.subplot(4, 4, i + 1)
         visualization = show_cam_on_image(image, grayscale_cam)
 

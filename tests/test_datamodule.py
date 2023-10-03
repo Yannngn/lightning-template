@@ -13,9 +13,7 @@ def test_mnist_datamodule(batch_size: int, cfg_train: DictConfig):
     with open_dict(cfg_train):
         cfg_train.datamodule.loaders.train.batch_size = batch_size
 
-    datamodule: MNISTDataModule = hydra.utils.instantiate(
-        cfg_train.datamodule, _recursive_=False
-    )
+    datamodule: MNISTDataModule = hydra.utils.instantiate(cfg_train.datamodule, _recursive_=False)
     datamodule.prepare_data()
 
     assert not datamodule.train_set
@@ -43,11 +41,12 @@ def test_mnist_datamodule(batch_size: int, cfg_train: DictConfig):
     test_samples = len(datamodule.test_set)
     assert (train_samples + valid_samples + test_samples) == 70_000
 
-    predict_samples = [len(value) for value in datamodule.predict_set.values()]
+    predict_samples = [len(value) for value in datamodule.predict_set.values()]  # type: ignore
     assert test_samples == sum(predict_samples)
 
-    batch = next(iter(datamodule.train_dataloader()))
+    batch: tuple[dict[str, torch.Tensor], torch.Tensor] = next(iter(datamodule.train_dataloader()))  # type: ignore
     x, y = batch
+
     assert len(x["image"]) == batch_size
     assert len(y) == batch_size
     assert x["image"].dtype == torch.float32

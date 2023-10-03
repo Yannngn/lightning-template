@@ -67,20 +67,18 @@ def save_state_dicts(
     """
 
     # save state dict for last checkpoint
-    mapped_state_dict = process_state_dict(
-        model.state_dict(), symbols=symbols, exceptions=exceptions
-    )
+    mapped_state_dict = process_state_dict(model.state_dict(), symbols=symbols, exceptions=exceptions)
     path = f"{dirname}/last_ckpt.pth"
     torch.save(mapped_state_dict, path)
     log.info(f"Last ckpt state dict saved to: {path}")
 
     # save state dict for best checkpoint
-    best_ckpt_path = trainer.checkpoint_callback.best_model_path
+    best_ckpt_path = getattr(trainer.checkpoint_callback, "best_model_path", "")
     if best_ckpt_path == "":
         log.warning("Best ckpt not found! Skipping...")
         return
 
-    best_ckpt_score = trainer.checkpoint_callback.best_model_score
+    best_ckpt_score = getattr(trainer.checkpoint_callback, "best_model_score", torch.tensor([0]))
     if best_ckpt_score is not None:
         prefix = str(best_ckpt_score.detach().cpu().item())
         prefix = prefix.replace(".", "_")
@@ -88,17 +86,13 @@ def save_state_dicts(
         log.warning("Best ckpt score not found! Use prefix <unknown>!")
         prefix = "unknown"
     model = model.load_from_checkpoint(best_ckpt_path)
-    mapped_state_dict = process_state_dict(
-        model.state_dict(), symbols=symbols, exceptions=exceptions
-    )
+    mapped_state_dict = process_state_dict(model.state_dict(), symbols=symbols, exceptions=exceptions)
     path = f"{dirname}/best_ckpt_{prefix}.pth"
     torch.save(mapped_state_dict, path)
     log.info(f"Best ckpt state dict saved to: {path}")
 
 
-def save_predictions_from_dataloader(
-    predictions: List[Any], path: Path
-) -> None:
+def save_predictions_from_dataloader(predictions: List[Any], path: Path) -> None:
     """Save predictions returned by `Trainer.predict` method for single
     dataloader.
 
@@ -135,9 +129,7 @@ def save_predictions_from_dataloader(
         raise NotImplementedError(f"{path.suffix} is not implemented!")
 
 
-def save_predictions(
-    predictions: List[Any], dirname: str, output_format: str = "json"
-) -> None:
+def save_predictions(predictions: List[Any], dirname: str, output_format: str = "json") -> None:
     """Save predictions returned by `Trainer.predict` method.
 
     Due to `LightningDataModule.predict_dataloader` return type is
@@ -175,16 +167,11 @@ def save_predictions(
     elif isinstance(predictions[0], list):
         for idx, predictions_idx in enumerate(predictions):
             if not predictions_idx:
-                log.warning(
-                    f"Predictions for DataLoader #{idx} is empty! Skipping..."
-                )
+                log.warning(f"Predictions for DataLoader #{idx} is empty! Skipping...")
                 continue
             target_path = path / f"predictions_{idx}.{output_format}"
             save_predictions_from_dataloader(predictions_idx, target_path)
-            log.info(
-                f"Saved predictions for DataLoader #{idx} to: "
-                f"{str(target_path)}"
-            )
+            log.info(f"Saved predictions for DataLoader #{idx} to: " f"{str(target_path)}")
         return
 
     raise Exception(

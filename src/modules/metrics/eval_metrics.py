@@ -11,9 +11,7 @@ from sklearn.metrics import (
 )
 
 
-def accuracy(
-    targets: List[int], preds: List[int], verbose: bool = True
-) -> float:
+def accuracy(targets: List[int], preds: List[int], verbose: bool = True) -> float:
     """Calculate Accuracy by classes.
 
     Args:
@@ -39,7 +37,7 @@ def accuracy(
         if verbose:
             print(f"class {target_i}: accuracy={acc_i:.5f}")
 
-    return acc
+    return float(acc)
 
 
 def auroc(
@@ -81,7 +79,7 @@ def auroc(
         plt.show()
     plt.close()
 
-    return roc_auc
+    return float(roc_auc)
 
 
 def auprc(
@@ -141,4 +139,4 @@ def auprc(
         plt.show()
     plt.close()
 
-    return pr_auc
+    return float(pr_auc)

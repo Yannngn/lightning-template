@@ -47,7 +47,7 @@ class BaseDataset(Dataset):
                 image = np.frombuffer(image, np.uint8)
                 image = cv2.imdecode(image, cv2.COLOR_RGB2BGR)
             else:
-                image = cv2.imread(image)
+                image = cv2.imread(str(image))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         else:
             raise NotImplementedError("use pillow or cv2")

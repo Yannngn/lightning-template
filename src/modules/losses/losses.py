@@ -15,7 +15,7 @@ def load_loss(loss_cfg: DictConfig) -> torch.nn.Module:
 
     weight_params = {}
     for param_name, param_value in loss_cfg.items():
-        if "weight" in param_name:
+        if "weight" in str(param_name):
             weight_params[param_name] = torch.tensor(param_value).float()
 
     loss = hydra.utils.instantiate(loss_cfg, **weight_params)

@@ -38,7 +38,7 @@ class RunIf:
     """
 
     def __new__(
-        self,
+        cls,
         min_gpus: int = 0,
         min_torch: Optional[str] = None,
         max_torch: Optional[str] = None,

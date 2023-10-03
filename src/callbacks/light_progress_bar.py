@@ -12,9 +12,7 @@ def n_lines(text: str) -> int:
     return text.count("\n") + 1
 
 
-def text_color(
-    style: Optional[int] = None, color: Optional[int] = None
-) -> Tuple[str, str]:
+def text_color(style: Optional[int] = None, color: Optional[int] = None) -> Tuple[str, str]:
     if color is None:
         color_code = 0
     else:
@@ -31,24 +29,28 @@ def text_color(
 
 def format_status(inp: Any) -> Any:
     if isinstance(inp, dict):
-        for key in inp:
-            inp[key] = format_status(inp[key])
-    if isinstance(inp, (list, tuple)):
-        for index in range(len(inp)):
-            inp[index] = format_status(inp[index])
+        return {key: format_status(value) for key, value in inp.items()}
+
+    if isinstance(inp, list):
+        return [format_status(item) for item in inp]
+
+    if isinstance(inp, list):
+        return (format_status(item) for item in inp)
+
     elif isinstance(inp, int):
         if abs(inp) > 10**6:
             return f"{inp:.3e}"
-        else:
-            return f"{inp:d}"
+
+        return f"{inp:d}"
+
     elif isinstance(inp, float):
         if abs(inp) > 10**6:
             return f"{inp:.3e}"
+
         elif abs(inp) < 10**-6:
             return f"{inp:.3e}"
-        else:
-            return f"{inp:.6f}"
-    return inp
+
+        return f"{inp:.6f}"
 
 
 def colorize_string(string: str, colors: List[Any], padding: int = 0) -> str:
@@ -89,13 +91,7 @@ def view_status(inp: Any, display_len: int = 80) -> str:
                 colors[-1].append((pos, start))
                 colors[-1].append((pos + len(sub_key), end))
                 sub_res.append(sub_key + ": " + str(inp[key][sub_key]))
-                pos = (
-                    pos
-                    + len(sub_key)
-                    + len(": ")
-                    + len(str(inp[key][sub_key]))
-                    + len(separator)
-                )
+                pos = pos + len(sub_key) + len(": ") + len(str(inp[key][sub_key])) + len(separator)
             strings[-1] += separator.join(sub_res)
         else:
             strings[-1] += str(inp[key])
@@ -121,11 +117,7 @@ def view_status(inp: Any, display_len: int = 80) -> str:
                 string_end = splitter_location
             else:
                 string_end = min(display_len, len(string))
-            while (
-                color_index < len(colors[index])
-                and colors[index][color_index][0] - position
-                < string_end - padding
-            ):
+            while color_index < len(colors[index]) and colors[index][color_index][0] - position < string_end - padding:
                 split_colors.append(list(colors[index][color_index]))
                 split_colors[-1][0] -= position
                 color_index += 1
@@ -133,27 +125,19 @@ def view_status(inp: Any, display_len: int = 80) -> str:
             if len(string) < display_len:
                 to_print = string
                 to_print = to_print + " " * (display_len - len(to_print))
-                new_strings.append(
-                    colorize_string(to_print, split_colors, padding=padding)
-                )
+                new_strings.append(colorize_string(to_print, split_colors, padding=padding))
                 break
             elif splitter_location > 0:
                 to_print = string[:splitter_location]
                 to_print = to_print + " " * (display_len - len(to_print))
-                new_strings.append(
-                    colorize_string(to_print, split_colors, padding=padding)
-                )
-                string = (
-                    " " * (max_len + 1) + string[(splitter_location + 3) :]
-                )
+                new_strings.append(colorize_string(to_print, split_colors, padding=padding))
+                string = " " * (max_len + 1) + string[(splitter_location + 3) :]
                 position += splitter_location + 3 - padding
                 padding = max_len + 1
             else:
                 to_print = string[:string_end]
                 to_print = to_print + " " * (display_len - len(to_print))
-                new_strings.append(
-                    colorize_string(to_print, split_colors, padding=padding)
-                )
+                new_strings.append(colorize_string(to_print, split_colors, padding=padding))
                 string = " " * (max_len + 1) + string[string_end:]
                 position += string_end - padding
                 padding = max_len + 1
@@ -189,9 +173,7 @@ def get_width() -> int:
 
 
 class StageProgressBar:
-    def __init__(
-        self, width_function: Callable, display_id: str = f"ep{0}"
-    ) -> None:
+    def __init__(self, width_function: Callable, display_id: str = f"ep{0}") -> None:
         self.width_function = width_function
         self.width = 0
         self.last_vals = None
@@ -201,9 +183,7 @@ class StageProgressBar:
 
     def __str__(self) -> str:
         status = format_status(self.last_vals)
-        to_view = view_status(
-            dict_to_multi_dict(status), display_len=self.width
-        )
+        to_view = view_status(dict_to_multi_dict(status), display_len=self.width)
         return to_view
 
     @staticmethod
@@ -256,42 +236,32 @@ class TimeEstimator:
     def update(self, cur_state: float) -> None:
         self.cur_state = cur_state
         if self.cur_state >= self.eta_threshold:
-            self.est_finish_time = (
-                self.start_time
-                + (time.time() - self.start_time) / self.cur_state
-            )
+            self.est_finish_time = self.start_time + (time.time() - self.start_time) / self.cur_state
 
     def __str__(self) -> str:
-        elapsed = str(
-            datetime.timedelta(seconds=int(time.time() - self.start_time))
-        )
+        elapsed = str(datetime.timedelta(seconds=int(time.time() - self.start_time)))
         if self.est_finish_time is not None:
-            eta = str(
-                datetime.timedelta(
-                    seconds=int(self.est_finish_time - time.time())
-                )
-            )
+            eta = str(datetime.timedelta(seconds=int(self.est_finish_time - time.time())))
         else:
             eta = "?"
         return f"[{elapsed}>{eta}]"
 
 
+# FIXME isso parece bem errado
 class LightProgressBar(ProgressBarBase):
     def __init__(self) -> None:
         super().__init__()
         self.last_epoch = 0
-        self.pbar = StageProgressBar(
-            width_function=get_width, display_id=f"ep{0}"
-        )
+        self.pbar = StageProgressBar(width_function=get_width, display_id=f"ep{0}")
         self.timer = TimeEstimator()
         self.display_counter = 0
-        self.enable = True
+        self.enable = True  # type: ignore
 
     def disable(self) -> None:
-        self.enable = False
+        self.enable = False  # type: ignore
 
     def enable(self) -> None:
-        self.enable = True
+        self.enable = True  # type: ignore
 
     def on_train_epoch_start(self, *args: Any, **kwargs: Any) -> None:
         self.timer.reset()
@@ -318,9 +288,7 @@ class LightProgressBar(ProgressBarBase):
         self.pbar.update(log)
         self.pbar.update(trainer.logged_metrics)
 
-    def step(
-        self, part: str, batch_idx: int, total_batches: int, *args: Any
-    ) -> None:
+    def step(self, part: str, batch_idx: int, total_batches: int | float, *args: Any) -> None:
         self.timer.update(float(batch_idx) / float(total_batches))
         trainer = args[0]
         log = copy.deepcopy(trainer.logged_metrics)
@@ -329,17 +297,14 @@ class LightProgressBar(ProgressBarBase):
             del log["epoch"]
         log["Info/Mode"] = part
         log["Info/Progress"] = (
-            progress_str(15, float(batch_idx) / float(total_batches))
-            + f" {str(batch_idx)} / {str(total_batches)}"
+            progress_str(15, float(batch_idx) / float(total_batches)) + f" {str(batch_idx)} / {str(total_batches)}"
         )
         log["Info/Time"] = str(self.timer)
         self.pbar.update(log)
 
     def on_train_batch_end(self, *args: Any, **kwargs: Any) -> None:
         super().on_train_batch_end(*args, **kwargs)
-        self.step(
-            "train", self.train_batch_idx, self.total_train_batches, *args
-        )
+        self.step("train", self.train_batch_idx, self.total_train_batches, *args)
 
     def on_validation_epoch_start(self, *args: Any, **kwargs: Any) -> None:
         self.timer.reset()
@@ -368,4 +333,5 @@ class LightProgressBar(ProgressBarBase):
 
     def on_validation_batch_end(self, *args: Any, **kwargs: Any) -> None:
         super().on_validation_batch_end(*args, **kwargs)
+
         self.step("val", self.val_batch_idx, self.total_val_batches, *args)

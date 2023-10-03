@@ -13,8 +13,8 @@ def run_sh_command(command: List[str]):
     package."""
     msg = None
     try:
-        sh.python(command)
-    except sh.ErrorReturnCode as e:
+        sh.python(command)  # type: ignore
+    except sh.ErrorReturnCode as e:  # type: ignore
         msg = e.stderr.decode()
     if msg:
         pytest.fail(msg=msg)

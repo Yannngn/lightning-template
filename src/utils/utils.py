@@ -7,10 +7,10 @@ from typing import Any, Callable, List, Optional
 import hydra
 from hydra import compose, initialize_config_dir
 from hydra.core.global_hydra import GlobalHydra
+from lightning_utilities.core.rank_zero import rank_zero_only
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning import Callback
 from pytorch_lightning.loggers import LightningLoggerBase
-from pytorch_lightning.utilities import rank_zero_only
 
 from src.modules.losses import load_loss
 from src.modules.metrics import load_metrics
@@ -38,10 +38,8 @@ def task_wrapper(task_func: Callable) -> Callable:
     """
 
     def wrap(cfg: DictConfig):
-
         # execute the task
         try:
-
             # apply extra utilities
             extras(cfg)
 
@@ -49,7 +47,6 @@ def task_wrapper(task_func: Callable) -> Callable:
 
         # things to do if exception occurs
         except Exception as ex:
-
             # save exception to `.log` file
             log.exception("")
 
@@ -59,7 +56,6 @@ def task_wrapper(task_func: Callable) -> Callable:
 
         # things to always do after either success or exception
         finally:
-
             # display output dir path in terminal
             log.info(f"Output dir: {cfg.paths.output_dir}")
 
@@ -90,9 +86,7 @@ def extras(cfg: DictConfig) -> None:
 
     # disable python warnings
     if cfg.extras.get("ignore_warnings"):
-        log.info(
-            "Disabling python warnings! <cfg.extras.ignore_warnings=True>"
-        )
+        log.info("Disabling python warnings! <cfg.extras.ignore_warnings=True>")
         warnings.filterwarnings("ignore")
 
     # prompt user to input tags from command line if none are provided in the config
@@ -102,9 +96,7 @@ def extras(cfg: DictConfig) -> None:
 
     # pretty print config tree using Rich library
     if cfg.extras.get("print_config"):
-        log.info(
-            "Printing config tree with Rich! <cfg.extras.print_config=True>"
-        )
+        log.info("Printing config tree with Rich! <cfg.extras.print_config=True>")
         rich_utils.print_config_tree(cfg, resolve=True, save_to_file=True)
 
 
@@ -187,12 +179,8 @@ def log_hyperparameters(object_dict: dict) -> None:
 
     # save number of model parameters
     hparams["module/params/total"] = sum(p.numel() for p in model.parameters())
-    hparams["module/params/trainable"] = sum(
-        p.numel() for p in model.parameters() if p.requires_grad
-    )
-    hparams["module/params/non_trainable"] = sum(
-        p.numel() for p in model.parameters() if not p.requires_grad
-    )
+    hparams["module/params/trainable"] = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    hparams["module/params/non_trainable"] = sum(p.numel() for p in model.parameters() if not p.requires_grad)
 
     hparams["datamodule"] = cfg["datamodule"]
     hparams["trainer"] = cfg["trainer"]
@@ -294,9 +282,7 @@ def instantiate_plugins(cfg: DictConfig) -> Optional[List[Any]]:
 
 def get_args_parser() -> argparse.ArgumentParser:
     """Get parser for additional Hydra's command line flags."""
-    parser = argparse.ArgumentParser(
-        description="Additional Hydra's command line flags parser."
-    )
+    parser = argparse.ArgumentParser(description="Additional Hydra's command line flags parser.")
 
     parser.add_argument(
         "--config-path",
@@ -325,9 +311,7 @@ def get_args_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def register_custom_resolvers(
-    version_base: str, config_path: str, config_name: str
-) -> Callable:
+def register_custom_resolvers(version_base: str, config_path: str, config_name: str) -> Callable:
     """Optional decorator to register custom OmegaConf resolvers. It is
     excepted to call before `hydra.main` decorator call.
 
@@ -360,12 +344,8 @@ def register_custom_resolvers(
 
     # register of replace resolver
     if not OmegaConf.has_resolver("replace"):
-        with initialize_config_dir(
-            version_base=version_base, config_dir=config_path
-        ):
-            cfg = compose(
-                config_name=config_name, return_hydra_config=True, overrides=[]
-            )
+        with initialize_config_dir(version_base=version_base, config_dir=config_path):
+            cfg = compose(config_name=config_name, return_hydra_config=True, overrides=[])
         cfg_tmp = cfg.copy()
         loss = load_loss(cfg_tmp.module.network.loss)
         metric, _, _ = load_metrics(cfg_tmp.module.network.metrics)
@@ -373,9 +353,9 @@ def register_custom_resolvers(
 
         OmegaConf.register_new_resolver(
             "replace",
-            lambda item: item.replace(
-                "__loss__", loss.__class__.__name__
-            ).replace("__metric__", metric.__class__.__name__),
+            lambda item: item.replace("__loss__", loss.__class__.__name__).replace(
+                "__metric__", metric.__class__.__name__
+            ),
         )
 
     def decorator(function: Callable) -> Callable:

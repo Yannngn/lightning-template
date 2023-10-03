@@ -5,8 +5,8 @@ import rich
 import rich.syntax
 import rich.tree
 from hydra.core.hydra_config import HydraConfig
+from lightning_utilities.core.rank_zero import rank_zero_only
 from omegaconf import DictConfig, OmegaConf, open_dict
-from pytorch_lightning.utilities import rank_zero_only
 from rich.prompt import Prompt
 
 from src.utils import pylogger
@@ -82,15 +82,11 @@ def enforce_tags(cfg: DictConfig, save_to_file: bool = False) -> None:
     """Prompts user to input tags from command line if no tags are provided in
     config."""
     if not cfg.get("tags"):
-        if "id" in HydraConfig().cfg.hydra.job:
+        if "id" in HydraConfig().cfg.hydra.job:  # type: ignore
             raise ValueError("Specify tags before launching a multirun!")
 
-        log.warning(
-            "No tags provided in config. Prompting user to input tags..."
-        )
-        tags = Prompt.ask(
-            "Enter a list of comma separated tags", default="dev"
-        )
+        log.warning("No tags provided in config. Prompting user to input tags...")
+        tags = Prompt.ask("Enter a list of comma separated tags", default="dev")
         tags = [t.strip() for t in tags.split(",") if t != ""]
 
         with open_dict(cfg):
