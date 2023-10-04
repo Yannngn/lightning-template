@@ -13,7 +13,7 @@ loss:
 
 metrics:
   main:
-    _target_: src.modules.metrics.components.segmentation.IoU
+    _target_: src.modules.metrics.components.detection.IoU
     num_classes: 2
     dist_sync_on_step: false
     dist_reduce_fx: sum

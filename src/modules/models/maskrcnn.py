@@ -33,8 +33,8 @@ class BaseMaskRCNNV2Module(nn.Module):
             trainable_backbone_layers=trainable_backbone_layers,
         )
 
-    def forward(self, x: Tensor) -> list[dict[str, Tensor]]:
-        return self.model(x)
+    def forward(self, x, y=None) -> list[dict[str, Tensor]]:
+        return self.model(x, y)
 
 
 class MaskRCNNV2Module(BaseMaskRCNNV2Module):
