@@ -366,3 +366,7 @@ def register_custom_resolvers(version_base: str, config_path: str, config_name: 
         return wrapper
 
     return decorator
+
+
+def maskrcnn_collate_fn(batch):
+    return tuple(zip(*batch))

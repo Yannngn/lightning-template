@@ -1,0 +1,17 @@
+train:
+  order: [totensor]
+  totensor:
+    _target_: albumentations.pytorch.transforms.ToTensorV2
+    always_apply: true
+
+valid_test_predict:
+  order: [totensor]
+  totensor:
+    _target_: albumentations.pytorch.transforms.ToTensorV2
+    always_apply: true
+
+bbox_params:
+  _target_: albumentations.BboxParams
+  format: pascal_voc
+  label_fields:
+    - labels

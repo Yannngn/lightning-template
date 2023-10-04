@@ -1,0 +1,41 @@
+_target_: src.modules.lit_detection.DetectionLitModule
+
+# this config file is used for running the template default tests
+
+# To avoiding copying of loss and metric names, during hydra initialization
+# there is custom resolver which replaces __loss__ to loss.__class__.__name__
+# and __metric__ to main_metric.__class__.__name__,
+# for example: ${replace:"__metric__/valid"}
+# Use quotes for defining internal value in ${replace:"..."} to avoid
+# grammar problems with hydra config parser.
+
+defaults:
+  - _self_
+  - network: maskrcnn_v2.yaml
+
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 0.001
+  weight_decay: 0.001
+  betas: [0.9, 0.999]
+  eps: 1.0e-08
+  amsgrad: False
+
+scheduler:
+  scheduler:
+    _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+    mode: min
+    factor: 0.1
+    min_lr: 1.0e-8
+    patience: 10
+    verbose: True
+  extras:
+    monitor: ${replace:"__loss__/train"}
+    interval: epoch
+    frequency: 1
+
+logging:
+  on_step: False
+  on_epoch: True
+  sync_dist: False
+  prog_bar: True

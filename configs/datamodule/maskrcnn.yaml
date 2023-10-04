@@ -1,0 +1,22 @@
+_target_: src.datamodules.darwin_datamodules.AIVIDataModule
+
+defaults:
+  - _self_
+  - loaders: maskrcnn.yaml
+  - transforms: maskrcnn.yaml
+
+datasets:
+  train:
+    _target_: src.datamodules.darwin_datasets.MaskRCNNDataset
+    csv: ${paths.data_dir}/datasets/headlight/ml46_farol_segmento_manual/releases/ml46-farol-segmento-manual-1799-ok/headlight_train.csv
+    root_dir: ${paths.data_dir}
+  valid: null
+  test:
+    _target_: src.datamodules.darwin_datasets.MaskRCNNDataset
+    csv: ${paths.data_dir}/datasets/headlight/ml46_farol_segmento_manual/releases/ml46-farol-segmento-manual-1799-ok/headlight_test.csv
+    root_dir: ${paths.data_dir}
+  predict:
+    test:
+      _target_: src.datamodules.darwin_datasets.MaskRCNNDataset
+      csv: ${paths.data_dir}/datasets/headlight/ml46_farol_segmento_manual/releases/ml46-farol-segmento-manual-1799-ok/headlight_test.csv
+      root_dir: ${paths.data_dir}

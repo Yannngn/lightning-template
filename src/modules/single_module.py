@@ -123,7 +123,7 @@ class SingleLitModule(BaseLitModule):
         )
 
         self.valid_add_metrics(preds, targets)
-        self.log_dict(self.valid_add_metrics, **self.logging_params)# type: ignore
+        self.log_dict(self.valid_add_metrics, **self.logging_params)  # type: ignore
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def validation_epoch_end(self, outputs: List[Any]) -> None:
@@ -140,7 +140,7 @@ class SingleLitModule(BaseLitModule):
 
     def test_step(self, batch: Any, batch_idx: int) -> Any:
         loss, preds, targets = self.model_step(batch, batch_idx)
-        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)# type: ignore
+        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)  # type: ignore
 
         self.test_metric(preds, targets)
         self.log(
@@ -150,7 +150,7 @@ class SingleLitModule(BaseLitModule):
         )
 
         self.test_add_metrics(preds, targets)
-        self.log_dict(self.test_add_metrics, **self.logging_params)# type: ignore
+        self.log_dict(self.test_add_metrics, **self.logging_params)  # type: ignore
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def test_epoch_end(self, outputs: List[Any]) -> None:
@@ -215,7 +215,7 @@ class SingleVicRegLitModule(BaseLitModule):
         self.loss = load_loss(network.loss)
         # projector
         self.projector = nn.Sequential(
-            nn.Linear(self.model.features_dim, proj_hidden_dim),
+            nn.Linear(self.model.features_dim, proj_hidden_dim),  # type: ignore
             nn.BatchNorm1d(proj_hidden_dim),
             nn.ReLU(),
             # nn.Linear(proj_hidden_dim, proj_hidden_dim),
@@ -261,7 +261,7 @@ class SingleVicRegLitModule(BaseLitModule):
 
     def test_step(self, batch: Any, batch_idx: int) -> Any:
         loss = self.model_step(batch, batch_idx)
-        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)# type: ignore
+        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)  # type: ignore
         return {"loss": loss}
 
     def test_epoch_end(self, outputs: List[Any]) -> None:
@@ -318,7 +318,7 @@ class SingleReIdLitModule(SingleLitModule):
         with torch.no_grad():
             loss, logits = self.loss(embeddings, batch["label"])
         preds = self.output_activation(logits)
-        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)# type: ignore
+        self.log(f"{self.loss.__class__.__name__}/test", loss, **self.logging_params)  # type: ignore
 
         self.test_metric(preds, targets)
         self.log(
