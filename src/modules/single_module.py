@@ -46,11 +46,17 @@ class SingleLitModule(BaseLitModule):
             kwargs (Any): Additional keyword arguments for pytorch_lightning.LightningModule.
         """
 
-        super().__init__(network, optimizer, scheduler, logging, *args, **kwargs)
+        super().__init__(
+            network, optimizer, scheduler, logging, *args, **kwargs
+        )
         self.loss = load_loss(network.loss)
-        self.output_activation = hydra.utils.instantiate(network.output_activation, _partial_=True)
+        self.output_activation = hydra.utils.instantiate(
+            network.output_activation, _partial_=True
+        )
 
-        main_metric, valid_metric_best, add_metrics = load_metrics(network.metrics)
+        main_metric, valid_metric_best, add_metrics = load_metrics(
+            network.metrics
+        )
         self.train_metric = main_metric.clone()
         self.train_add_metrics = add_metrics.clone(postfix="/train")
         self.valid_metric = main_metric.clone()
@@ -156,7 +162,9 @@ class SingleLitModule(BaseLitModule):
     def test_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
-    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def predict_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
         logits = self.forward(batch["image"])
         preds = self.output_activation(logits)
         outputs = {"logits": logits, "preds": preds}
@@ -178,7 +186,9 @@ class MNISTLitModule(SingleLitModule):
         preds = self.output_activation(logits)
         return loss, preds, y
 
-    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def predict_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
         x, y = batch
         logits = self.forward(x["image"])
         preds = self.output_activation(logits)
@@ -211,7 +221,9 @@ class SingleVicRegLitModule(BaseLitModule):
             kwargs (Any): Additional keyword arguments for pytorch_lightning.LightningModule.
         """
 
-        super().__init__(network, optimizer, scheduler, logging, *args, **kwargs)
+        super().__init__(
+            network, optimizer, scheduler, logging, *args, **kwargs
+        )
         self.loss = load_loss(network.loss)
         # projector
         self.projector = nn.Sequential(
@@ -328,7 +340,9 @@ class SingleReIdLitModule(SingleLitModule):
         )
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def predict_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
         outputs = {"embeddings": self.forward(batch["image"])}
         if "name" in batch:
             outputs.update({"names": batch["name"]})

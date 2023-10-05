@@ -39,7 +39,9 @@ class AIVIDataModule(LightningDataModule):
         https://pytorch-lightning.readthedocs.io/en/latest/data/datamodule.html
     """
 
-    def __init__(self, datasets: DictConfig, loaders: DictConfig, transforms: DictConfig) -> None:
+    def __init__(
+        self, datasets: DictConfig, loaders: DictConfig, transforms: DictConfig
+    ) -> None:
         """DataModule with standalone train, val and test dataloaders.
 
         Args:
@@ -57,9 +59,13 @@ class AIVIDataModule(LightningDataModule):
         self.test_set: Optional[Dataset] = None
         self.predict_set: Dict[str, Dataset] = OrderedDict()
 
-        self.collate_fn = hydra.utils.instantiate(self.cfg_loaders.get("collate_fn"), _partial_=True)
+        self.collate_fn = hydra.utils.instantiate(
+            self.cfg_loaders.get("collate_fn"), _partial_=True
+        )
 
-    def _get_dataset(self, stage: str, dataset_name: Optional[str] = None) -> Dataset:
+    def _get_dataset(
+        self, stage: str, dataset_name: Optional[str] = None
+    ) -> Dataset:
         self.transforms.set_mode(stage)
         cfg: DictConfig = self.cfg_datasets.get(stage)
 
@@ -104,27 +110,47 @@ class AIVIDataModule(LightningDataModule):
         # load predict datasets only if it exists in config
         if self.cfg_datasets.get("predict"):
             for dataset_name in self.cfg_datasets.get("predict").keys():
-                self.predict_set[dataset_name] = self._get_dataset("predict", dataset_name=dataset_name)
+                self.predict_set[dataset_name] = self._get_dataset(
+                    "predict", dataset_name=dataset_name
+                )
 
     def train_dataloader(
         self,
     ) -> Union[DataLoader, List[DataLoader], Dict[str, DataLoader]]:
         assert self.train_set is not None
 
-        return DataLoader(self.train_set, **self.cfg_loaders.get("train"), collate_fn=self.collate_fn)
+        return DataLoader(
+            self.train_set,
+            **self.cfg_loaders.get("train"),
+            collate_fn=self.collate_fn
+        )
 
     def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
         assert self.valid_set is not None
-        return DataLoader(self.valid_set, **self.cfg_loaders.get("valid"), collate_fn=self.collate_fn)
+        return DataLoader(
+            self.valid_set,
+            **self.cfg_loaders.get("valid"),
+            collate_fn=self.collate_fn
+        )
 
     def test_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
         assert self.test_set is not None
-        return DataLoader(self.test_set, **self.cfg_loaders.get("test"), collate_fn=self.collate_fn)
+        return DataLoader(
+            self.test_set,
+            **self.cfg_loaders.get("test"),
+            collate_fn=self.collate_fn
+        )
 
     def predict_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
         loaders = []
         for _, dataset in self.predict_set.items():
-            loaders.append(DataLoader(dataset, **self.cfg_loaders.get("predict"), collate_fn=self.collate_fn))
+            loaders.append(
+                DataLoader(
+                    dataset,
+                    **self.cfg_loaders.get("predict"),
+                    collate_fn=self.collate_fn
+                )
+            )
         return loaders
 
     def teardown(self, stage: Optional[str] = None):

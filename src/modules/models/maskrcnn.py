@@ -9,7 +9,9 @@ from torchvision.models.detection.mask_rcnn import (
 )
 from torchvision.models.resnet import ResNet50_Weights
 
-BatchType: TypeAlias = Tuple[List[Tensor], List[Dict[str, Tensor]], List[Tuple[Any, ...]]]
+BatchType: TypeAlias = Tuple[
+    List[Tensor], List[Dict[str, Tensor]], List[Tuple[Any, ...]]
+]
 
 EvalOutput: TypeAlias = List[Dict[str, Tensor]]
 
@@ -55,9 +57,15 @@ class MaskRCNNV2Module(BaseMaskRCNNV2Module):
             )
             return
 
-        assert num_classes is not None, "if finetuning num_classes must be an integer"
+        assert (
+            num_classes is not None
+        ), "if finetuning num_classes must be an integer"
 
-        weights = MaskRCNN_ResNet50_FPN_V2_Weights.DEFAULT if weights is None else weights
+        weights = (
+            MaskRCNN_ResNet50_FPN_V2_Weights.DEFAULT
+            if weights is None
+            else weights
+        )
 
         super().__init__(
             weights=weights,
@@ -66,10 +74,14 @@ class MaskRCNNV2Module(BaseMaskRCNNV2Module):
 
         in_features = self.model.roi_heads.box_predictor.cls_score.in_features  # type: ignore
 
-        self.model.roi_heads.box_predictor = FastRCNNPredictor(in_channels=in_features, num_classes=num_classes)
+        self.model.roi_heads.box_predictor = FastRCNNPredictor(
+            in_channels=in_features, num_classes=num_classes
+        )
 
         in_features_mask = self.model.roi_heads.mask_predictor.conv5_mask.in_channels  # type: ignore
 
         self.model.roi_heads.mask_predictor = MaskRCNNPredictor(
-            in_channels=in_features_mask, dim_reduced=256, num_classes=num_classes
+            in_channels=in_features_mask,
+            dim_reduced=256,
+            num_classes=num_classes,
         )

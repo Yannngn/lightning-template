@@ -147,7 +147,9 @@ class NoLabelsDataset(BaseDataset):
 
         super().__init__(transforms, read_mode, to_gray)
         if file_paths or dir_paths or txt_paths:
-            self.keys = parse_image_paths(file_paths=file_paths, dir_paths=dir_paths, txt_paths=txt_paths)
+            self.keys = parse_image_paths(
+                file_paths=file_paths, dir_paths=dir_paths, txt_paths=txt_paths
+            )
         elif json_paths:
             self.keys = []
             for json_path in json_paths:

@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 import hydra
 import numpy as np
+import torch
 from omegaconf import DictConfig
 
 from src.modules.components.lit_module import BaseLitModule
@@ -20,11 +21,17 @@ class DetectionLitModule(BaseLitModule):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(network, optimizer, scheduler, logging, *args, **kwargs)
+        super().__init__(
+            network, optimizer, scheduler, logging, *args, **kwargs
+        )
         self.loss = load_loss(network.get("loss"))
-        self.output_activation = hydra.utils.instantiate(network.get("output_activation"), _partial_=True)
+        self.output_activation = hydra.utils.instantiate(
+            network.get("output_activation"), _partial_=True
+        )
 
-        main_metric, valid_metric_best, extra_metrics = load_metrics(network.get("metrics"))
+        main_metric, valid_metric_best, extra_metrics = load_metrics(
+            network.get("metrics")
+        )
         self.train_metric = main_metric.clone()
         self.train_extra_metrics = extra_metrics.clone(postfix="/train")
 
@@ -40,7 +47,9 @@ class DetectionLitModule(BaseLitModule):
     def on_train_start(self) -> None:
         self.valid_metric_best.reset()
 
-    def training_step(self, batch: BatchType, batch_idx: int) -> Dict[str, Any]:
+    def training_step(
+        self, batch: BatchType, batch_idx: int
+    ) -> Dict[str, Any]:
         self.model.train()
 
         images, targets, _ = batch
@@ -67,8 +76,12 @@ class DetectionLitModule(BaseLitModule):
         # _, image_names = zip(*info)
 
         outputs: EvalOutput = self.model(images)
-
-        loss = np.mean([1 - score.item() for output in outputs for score in output["scores"]])
+        loss = (
+            1
+            - torch.mean(
+                torch.cat([output["scores"] for output in outputs])
+            ).item()
+        )
 
         self.log(
             f"{self.loss.__class__.__name__}/valid",
@@ -105,7 +118,13 @@ class DetectionLitModule(BaseLitModule):
 
         outputs: EvalOutput = self.model(images)
 
-        loss = np.mean([1 - score.item() for output in outputs for score in output["scores"]])
+        loss = np.mean(
+            [
+                1 - score.item()
+                for output in outputs
+                for score in output["scores"]
+            ]
+        )
 
         self.log(
             f"{self.loss.__class__.__name__}/test",
@@ -127,7 +146,9 @@ class DetectionLitModule(BaseLitModule):
     def test_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
-    def predict_step(self, batch: BatchType, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def predict_step(
+        self, batch: BatchType, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
         images, _, _ = batch
         return self.forward(images)
 

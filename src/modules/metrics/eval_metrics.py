@@ -11,7 +11,9 @@ from sklearn.metrics import (
 )
 
 
-def accuracy(targets: List[int], preds: List[int], verbose: bool = True) -> float:
+def accuracy(
+    targets: List[int], preds: List[int], verbose: bool = True
+) -> float:
     """Calculate Accuracy by classes.
 
     Args:

@@ -14,12 +14,22 @@ ClassifierInput: TypeAlias = Tuple[Any, torch.Tensor, Tuple[int, str]]
 
 
 class ClassifierDataset(Dataset):
-    def __init__(self, csv: str, root_dir: str, transforms: Optional[A.Compose] = None, **kwargs) -> None:
+    def __init__(
+        self,
+        csv: str,
+        root_dir: str,
+        transforms: Optional[A.Compose] = None,
+        **kwargs
+    ) -> None:
         data = pd.read_csv(csv)
 
-        data.iloc[:, 0] = data.iloc[:, 0].apply(lambda x: os.path.join(root_dir, x))
+        data.iloc[:, 0] = data.iloc[:, 0].apply(
+            lambda x: os.path.join(root_dir, x)
+        )
 
-        file_exists = data.apply(lambda row: cv2.haveImageReader(row.iloc[0]), axis=1)
+        file_exists = data.apply(
+            lambda row: cv2.haveImageReader(row.iloc[0]), axis=1
+        )
 
         data = data[file_exists]
 
@@ -35,7 +45,9 @@ class ClassifierDataset(Dataset):
         image_path = self.images[idx]
         image_name = os.path.basename(image_path)
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        image = (
+            cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        )
 
         label = self.labels[idx]
         label = torch.tensor(label, dtype=torch.long)
@@ -47,14 +59,26 @@ class ClassifierDataset(Dataset):
 
 
 class MaskRCNNDataset(Dataset):
-    def __init__(self, csv: str, root_dir: str, transforms: Optional[A.Compose] = None, **kwargs) -> None:
+    def __init__(
+        self,
+        csv: str,
+        root_dir: str,
+        transforms: Optional[A.Compose] = None,
+        **kwargs
+    ) -> None:
         data = pd.read_csv(csv)
 
-        data.iloc[:, 0] = data.iloc[:, 0].apply(lambda x: os.path.join(root_dir, x))
-        data.iloc[:, 1] = data.iloc[:, 1].apply(lambda x: os.path.join(root_dir, x))
+        data.iloc[:, 0] = data.iloc[:, 0].apply(
+            lambda x: os.path.join(root_dir, x)
+        )
+        data.iloc[:, 1] = data.iloc[:, 1].apply(
+            lambda x: os.path.join(root_dir, x)
+        )
 
         file_exists = data.apply(
-            lambda row: cv2.haveImageReader(row.iloc[0]) and cv2.haveImageReader(row.iloc[1]), axis=1
+            lambda row: cv2.haveImageReader(row.iloc[0])
+            and cv2.haveImageReader(row.iloc[1]),
+            axis=1,
         )
 
         data = data[file_exists]
@@ -71,7 +95,9 @@ class MaskRCNNDataset(Dataset):
         image_name = os.path.basename(image_path)
 
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        image = (
+            cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        )
 
         mask_path = self.labels[idx]
 
@@ -125,7 +151,11 @@ class MaskRCNNDataset(Dataset):
             sample = self.transforms(**sample)
 
             image = sample["image"]
-            target["boxes"] = torch.as_tensor(sample["bboxes"], dtype=torch.float32)
-            target["masks"] = torch.as_tensor(np.stack(sample["masks"], axis=0), dtype=torch.uint8)
+            target["boxes"] = torch.as_tensor(
+                sample["bboxes"], dtype=torch.float32
+            )
+            target["masks"] = torch.as_tensor(
+                np.stack(sample["masks"], axis=0), dtype=torch.uint8
+            )
 
         return image, target, (idx, image_name)

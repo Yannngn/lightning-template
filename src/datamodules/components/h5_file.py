@@ -48,7 +48,9 @@ class H5PyFile:
     Thanks to Andrei Stoskii for this module which I slightly reworked.
     """
 
-    def __init__(self, filename: Optional[str] = None, mode: str = "r", **kwargs: Any) -> None:
+    def __init__(
+        self, filename: Optional[str] = None, mode: str = "r", **kwargs: Any
+    ) -> None:
         """H5PyFile module.
 
         Args:
@@ -124,7 +126,9 @@ class H5PyFile:
         filename = Path(filename)
         ext = filename.suffix
         if ext != ".h5":
-            raise RuntimeError(f"Expected extension to be '.h5', instead got '{ext}'.")
+            raise RuntimeError(
+                f"Expected extension to be '.h5', instead got '{ext}'."
+            )
         dirname = Path("" if dirname is None else dirname)
         progress_bar = tqdm if verbose else (lambda it, *_, **__: it)
 
@@ -134,7 +138,9 @@ class H5PyFile:
             content,
             n_jobs=128,
         )
-        for filepath, found in progress_bar(generator, desc="Indexing content", total=len(content)):
+        for filepath, found in progress_bar(
+            generator, desc="Indexing content", total=len(content)
+        ):
             if not found:
                 raise FileNotFoundError(filepath)
 
@@ -145,5 +151,7 @@ class H5PyFile:
             n_jobs=128,
         )
         with h5py.File(filename, mode="x") as dataset:
-            for filepath, data in progress_bar(generator, desc="Creating dataset", total=len(content)):
+            for filepath, data in progress_bar(
+                generator, desc="Creating dataset", total=len(content)
+            ):
                 dataset[str(filepath)] = data

@@ -11,7 +11,9 @@ from pytorch_lightning.loggers.comet import CometLogger
 def get_comet_logger(trainer: Trainer) -> CometLogger:
     """Safely get Weights&Biases logger from Trainer."""
 
-    if hasattr(trainer, "fast_dev_run") and getattr(trainer, "fast_dev_run", None):
+    if hasattr(trainer, "fast_dev_run") and getattr(
+        trainer, "fast_dev_run", None
+    ):
         raise Exception(
             "Cannot use wandb callbacks since pytorch lightning disables loggers in `fast_dev_run=true` mode."
         )
@@ -24,7 +26,9 @@ def get_comet_logger(trainer: Trainer) -> CometLogger:
             if isinstance(logger, CometLogger):
                 return logger
 
-    raise Exception("You are using comet related callback, but CometLogger was not found for some reason...")
+    raise Exception(
+        "You are using comet related callback, but CometLogger was not found for some reason..."
+    )
 
 
 class WatchModel(Callback):
@@ -54,7 +58,9 @@ class UploadCodeAsArtifact(Callback):
         self.use_git = use_git
 
     @rank_zero_only
-    def on_train_start(self, trainer: Trainer, pl_module: pl.LightningModule) -> None:
+    def on_train_start(
+        self, trainer: Trainer, pl_module: pl.LightningModule
+    ) -> None:
         logger = get_comet_logger(trainer=trainer)
         experiment: comet_ml.Experiment = logger.experiment
 
@@ -62,7 +68,11 @@ class UploadCodeAsArtifact(Callback):
 
         if self.use_git:
             # get .git folder path
-            git_dir_path = Path(check_output(["git", "rev-parse", "--git-dir"]).strip().decode("utf8")).resolve()
+            git_dir_path = Path(
+                check_output(["git", "rev-parse", "--git-dir"])
+                .strip()
+                .decode("utf8")
+            ).resolve()
 
             for path in Path(self.code_dir).resolve().rglob("*"):
                 # don't upload files ignored by git
@@ -74,11 +84,17 @@ class UploadCodeAsArtifact(Callback):
                 not_git = not str(path).startswith(str(git_dir_path))
 
                 if path.is_file() and not_git and not_ignored:
-                    code.add(str(path), logical_path=str(path.relative_to(self.code_dir)))
+                    code.add(
+                        str(path),
+                        logical_path=str(path.relative_to(self.code_dir)),
+                    )
 
         else:
             for path in Path(self.code_dir).resolve().rglob("*.py"):
-                code.add(str(path), logical_path=str(path.relative_to(self.code_dir)))
+                code.add(
+                    str(path),
+                    logical_path=str(path.relative_to(self.code_dir)),
+                )
 
         experiment.log_artifact(code)
 
@@ -91,15 +107,21 @@ class UploadCheckpointsAsArtifact(Callback):
         self.upload_best_only = upload_best_only
 
     @rank_zero_only
-    def on_keyboard_interrupt(self, trainer: Trainer, pl_module: pl.LightningModule) -> None:
+    def on_keyboard_interrupt(
+        self, trainer: Trainer, pl_module: pl.LightningModule
+    ) -> None:
         self.on_train_end(trainer, pl_module)
 
     @rank_zero_only
-    def on_train_end(self, trainer: Trainer, pl_module: pl.LightningModule) -> None:
+    def on_train_end(
+        self, trainer: Trainer, pl_module: pl.LightningModule
+    ) -> None:
         logger = get_comet_logger(trainer=trainer)
         experiment: comet_ml.Experiment = logger.experiment
 
-        ckpts = comet_ml.Artifact("experiment-ckpts", artifact_type="checkpoints")
+        ckpts = comet_ml.Artifact(
+            "experiment-ckpts", artifact_type="checkpoints"
+        )
 
         if self.upload_best_only:
             ckpts.add(getattr(trainer.checkpoint_callback, "best_model_path"))

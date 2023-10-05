@@ -25,9 +25,13 @@ class TransformsWrapper:
         train_aug = []
         if transforms_cfg.train.get("order"):
             for aug_name in transforms_cfg.train.get("order"):
-                aug = hydra.utils.instantiate(transforms_cfg.train.get(aug_name), _convert_="object")
+                aug = hydra.utils.instantiate(
+                    transforms_cfg.train.get(aug_name), _convert_="object"
+                )
                 train_aug.append(aug)
-        self.train_aug = albumentations.Compose(train_aug, bbox_params=bbox_params)
+        self.train_aug = albumentations.Compose(
+            train_aug, bbox_params=bbox_params
+        )
 
         # valid, test and predict augmentations
         valid_test_predict_aug = []
@@ -38,7 +42,9 @@ class TransformsWrapper:
                     _convert_="object",
                 )
                 valid_test_predict_aug.append(aug)
-        self.valid_test_predict_aug = albumentations.Compose(valid_test_predict_aug, bbox_params=bbox_params)
+        self.valid_test_predict_aug = albumentations.Compose(
+            valid_test_predict_aug, bbox_params=bbox_params
+        )
 
     def set_mode(self, mode: str) -> None:
         """Set `__call__` mode.
