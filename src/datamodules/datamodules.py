@@ -38,7 +38,9 @@ class SingleDataModule(LightningDataModule):
         https://pytorch-lightning.readthedocs.io/en/latest/data/datamodule.html
     """
 
-    def __init__(self, datasets: DictConfig, loaders: DictConfig, transforms: DictConfig) -> None:
+    def __init__(
+        self, datasets: DictConfig, loaders: DictConfig, transforms: DictConfig
+    ) -> None:
         """DataModule with standalone train, val and test dataloaders.
 
         Args:
@@ -56,12 +58,16 @@ class SingleDataModule(LightningDataModule):
         self.test_set: Optional[Dataset] = None
         self.predict_set: Dict[str, Dataset] = OrderedDict()
 
-    def _get_dataset_(self, split_name: str, dataset_name: Optional[str] = None) -> Dataset:
+    def _get_dataset_(
+        self, split_name: str, dataset_name: Optional[str] = None
+    ) -> Dataset:
         self.transforms.set_mode(split_name)
         cfg = self.cfg_datasets.get(split_name)
         if dataset_name:
             cfg = cfg.get(dataset_name)
-        dataset: Dataset = hydra.utils.instantiate(cfg, transforms=self.transforms)
+        dataset: Dataset = hydra.utils.instantiate(
+            cfg, transforms=self.transforms
+        )
         return dataset
 
     def setup(self, stage: Optional[str] = None) -> None:
@@ -80,7 +86,9 @@ class SingleDataModule(LightningDataModule):
         # load predict datasets only if it exists in config
         if (stage == "predict") and self.cfg_datasets.get("predict"):
             for dataset_name in self.cfg_datasets.get("predict").keys():
-                self.predict_set[dataset_name] = self._get_dataset_("predict", dataset_name=dataset_name)
+                self.predict_set[dataset_name] = self._get_dataset_(
+                    "predict", dataset_name=dataset_name
+                )
 
     def train_dataloader(
         self,
@@ -99,7 +107,9 @@ class SingleDataModule(LightningDataModule):
     def predict_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
         loaders = []
         for _, dataset in self.predict_set.items():
-            loaders.append(DataLoader(dataset, **self.cfg_loaders.get("predict")))
+            loaders.append(
+                DataLoader(dataset, **self.cfg_loaders.get("predict"))
+            )
         return loaders
 
     def teardown(self, stage: Optional[str] = None):
@@ -108,7 +118,9 @@ class SingleDataModule(LightningDataModule):
 
 
 class MultipleDataModule(SingleDataModule):
-    def __init__(self, datasets: DictConfig, loaders: DictConfig, transforms: DictConfig) -> None:
+    def __init__(
+        self, datasets: DictConfig, loaders: DictConfig, transforms: DictConfig
+    ) -> None:
         """DataModule with multiple train, val and test dataloaders.
 
         Args:
@@ -117,7 +129,9 @@ class MultipleDataModule(SingleDataModule):
             transforms (DictConfig): Transforms config.
         """
 
-        super().__init__(datasets=datasets, loaders=loaders, transforms=transforms)
+        super().__init__(
+            datasets=datasets, loaders=loaders, transforms=transforms
+        )
         self.train_set: Optional[Dict[str, Dataset]] = None
         self.valid_set: Optional[Dict[str, Dataset]] = None
         self.test_set: Optional[Dict[str, Dataset]] = None
@@ -135,17 +149,25 @@ class MultipleDataModule(SingleDataModule):
         if not self.train_set and not self.valid_set and not self.test_set:
             self.train_set = OrderedDict()
             for dataset_name in self.cfg_datasets.get("train").keys():
-                self.train_set[dataset_name] = self._get_dataset_("train", dataset_name=dataset_name)
+                self.train_set[dataset_name] = self._get_dataset_(
+                    "train", dataset_name=dataset_name
+                )
             self.valid_set = OrderedDict()
             for dataset_name in self.cfg_datasets.get("valid").keys():
-                self.valid_set[dataset_name] = self._get_dataset_("valid", dataset_name=dataset_name)
+                self.valid_set[dataset_name] = self._get_dataset_(
+                    "valid", dataset_name=dataset_name
+                )
             self.test_set = OrderedDict()
             for dataset_name in self.cfg_datasets.get("test").keys():
-                self.test_set[dataset_name] = self._get_dataset_("test", dataset_name=dataset_name)
+                self.test_set[dataset_name] = self._get_dataset_(
+                    "test", dataset_name=dataset_name
+                )
         # load predict datasets only if it exists in config
         if (stage == "predict") and self.cfg_datasets.get("predict"):
             for dataset_name in self.cfg_datasets.get("predict").keys():
-                self.predict_set[dataset_name] = self._get_dataset_("predict", dataset_name=dataset_name)
+                self.predict_set[dataset_name] = self._get_dataset_(
+                    "predict", dataset_name=dataset_name
+                )
 
     def train_dataloader(
         self,
@@ -153,14 +175,18 @@ class MultipleDataModule(SingleDataModule):
         assert self.train_set is not None
         loaders = dict()
         for dataset_name, dataset in self.train_set.items():
-            loaders[dataset_name] = DataLoader(dataset, **self.cfg_loaders.get("train"))
+            loaders[dataset_name] = DataLoader(
+                dataset, **self.cfg_loaders.get("train")
+            )
         return loaders
 
     def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
         assert self.valid_set is not None
         loaders = []
         for _, dataset in self.valid_set.items():
-            loaders.append(DataLoader(dataset, **self.cfg_loaders.get("valid")))
+            loaders.append(
+                DataLoader(dataset, **self.cfg_loaders.get("valid"))
+            )
         return loaders
 
     def test_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
@@ -173,5 +199,7 @@ class MultipleDataModule(SingleDataModule):
     def predict_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
         loaders = []
         for _, dataset in self.predict_set.items():
-            loaders.append(DataLoader(dataset, **self.cfg_loaders.get("predict")))
+            loaders.append(
+                DataLoader(dataset, **self.cfg_loaders.get("predict"))
+            )
         return loaders

@@ -32,12 +32,18 @@ class MultipleLitModule(BaseLitModule):
             kwargs (Any): Additional keyword arguments for pytorch_lightning.LightningModule.
         """
 
-        super().__init__(network, optimizer, scheduler, logging, *args, **kwargs)
+        super().__init__(
+            network, optimizer, scheduler, logging, *args, **kwargs
+        )
         self.loss = load_loss(network.loss)
-        self.output_activation = hydra.utils.instantiate(network.output_activation, _partial_=True)
+        self.output_activation = hydra.utils.instantiate(
+            network.output_activation, _partial_=True
+        )
         self.heads = heads
 
-        main_metric, valid_metric_best, add_metrics = load_metrics(network.metrics)
+        main_metric, valid_metric_best, add_metrics = load_metrics(
+            network.metrics
+        )
         for head in heads:
             for step in ("train", "valid", "test"):
                 setattr(self, f"{step}_metric_{head}", main_metric.clone())
@@ -54,7 +60,9 @@ class MultipleLitModule(BaseLitModule):
     def on_train_start(self) -> None:
         self.total_valid_metric_best.reset()
 
-    def log_metrics(self, step: str, head: str, preds: torch.Tensor, targets: torch.Tensor) -> None:
+    def log_metrics(
+        self, step: str, head: str, preds: torch.Tensor, targets: torch.Tensor
+    ) -> None:
         metric = getattr(self, f"{step}_metric_{head}")
         metric(preds, targets)
         self.log(
@@ -95,7 +103,9 @@ class MultipleLitModule(BaseLitModule):
     def training_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
-    def validation_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def validation_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
         head = self.heads[dataloader_idx]
         logits = self.forward(batch["image"])[dataloader_idx]
         preds = self.output_activation(logits)
@@ -121,7 +131,9 @@ class MultipleLitModule(BaseLitModule):
             **self.logging_params,  # type: ignore
         )
 
-    def test_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def test_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
         head = self.heads[dataloader_idx]
         logits = self.forward(batch["image"])[dataloader_idx]
         preds = self.output_activation(logits)
@@ -140,7 +152,9 @@ class MultipleLitModule(BaseLitModule):
     def test_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
-    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def predict_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
         logits = self.forward(batch["image"])
         outputs = {"logits": {}, "preds": {}}
         for idx, head in enumerate(self.heads):

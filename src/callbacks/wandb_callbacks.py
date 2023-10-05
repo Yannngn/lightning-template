@@ -12,9 +12,12 @@ from pytorch_lightning.loggers.wandb import WandbLogger
 def get_wandb_logger(trainer: Trainer) -> WandbLogger:
     """Safely get Weights&Biases logger from Trainer."""
 
-    if hasattr(trainer, "fast_dev_run") and getattr(trainer, "fast_dev_run", None):
+    if hasattr(trainer, "fast_dev_run") and getattr(
+        trainer, "fast_dev_run", None
+    ):
         raise Exception(
-            "Cannot use wandb callbacks since pytorch lightning disables" "loggers in `fast_dev_run=true` mode."
+            "Cannot use wandb callbacks since pytorch lightning disables"
+            "loggers in `fast_dev_run=true` mode."
         )
 
     if isinstance(trainer.logger, WandbLogger):
@@ -25,7 +28,10 @@ def get_wandb_logger(trainer: Trainer) -> WandbLogger:
             if isinstance(logger, WandbLogger):
                 return logger
 
-    raise Exception("You are using wandb related callback, but WandbLogger was not" "found for some reason...")
+    raise Exception(
+        "You are using wandb related callback, but WandbLogger was not"
+        "found for some reason..."
+    )
 
 
 class WatchModel(Callback):
@@ -70,7 +76,11 @@ class UploadCodeAsArtifact(Callback):
 
         if self.use_git:
             # get .git folder path
-            git_dir_path = Path(check_output(["git", "rev-parse", "--git-dir"]).strip().decode("utf8")).resolve()
+            git_dir_path = Path(
+                check_output(["git", "rev-parse", "--git-dir"])
+                .strip()
+                .decode("utf8")
+            ).resolve()
 
             for path in Path(self.code_dir).resolve().rglob("*"):
                 # don't upload files ignored by git
@@ -82,11 +92,15 @@ class UploadCodeAsArtifact(Callback):
                 not_git = not str(path).startswith(str(git_dir_path))
 
                 if path.is_file() and not_git and not_ignored:
-                    code.add_file(str(path), name=str(path.relative_to(self.code_dir)))
+                    code.add_file(
+                        str(path), name=str(path.relative_to(self.code_dir))
+                    )
 
         else:
             for path in Path(self.code_dir).resolve().rglob("*.py"):
-                code.add_file(str(path), name=str(path.relative_to(self.code_dir)))
+                code.add_file(
+                    str(path), name=str(path.relative_to(self.code_dir))
+                )
 
         # FIXME experiment info
         experiment.log_artifact(code)
@@ -111,7 +125,9 @@ class UploadCheckpointsAsArtifact(Callback):
         ckpts = wandb.Artifact("experiment-ckpts", type="checkpoints")
 
         if self.upload_best_only:
-            ckpts.add_file(getattr(trainer.checkpoint_callback, "best_model_path"))
+            ckpts.add_file(
+                getattr(trainer.checkpoint_callback, "best_model_path")
+            )
         else:
             for path in Path(self.ckpt_dir).rglob("*.ckpt"):
                 ckpts.add_file(str(path))

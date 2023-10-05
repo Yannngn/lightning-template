@@ -84,19 +84,27 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
 
     # Init lightning datamodule
     log.info(f"Instantiating datamodule <{cfg.datamodule._target_}>")
-    datamodule: LightningDataModule = hydra.utils.instantiate(cfg.datamodule, _recursive_=False)
+    datamodule: LightningDataModule = hydra.utils.instantiate(
+        cfg.datamodule, _recursive_=False
+    )
 
     # Init lightning model
     log.info(f"Instantiating lightning model <{cfg.module._target_}>")
-    model: LightningModule = hydra.utils.instantiate(cfg.module, _recursive_=False)
+    model: LightningModule = hydra.utils.instantiate(
+        cfg.module, _recursive_=False
+    )
 
     # Init callbacks
     log.info("Instantiating callbacks...")
-    callbacks: List[Callback] = utils.instantiate_callbacks(cfg.get("callbacks"))
+    callbacks: List[Callback] = utils.instantiate_callbacks(
+        cfg.get("callbacks")
+    )
 
     # Init loggers
     log.info("Instantiating loggers...")
-    logger: List[LightningLoggerBase] = utils.instantiate_loggers(cfg.get("logger"))
+    logger: List[LightningLoggerBase] = utils.instantiate_loggers(
+        cfg.get("logger")
+    )
 
     # Init lightning ddp plugins
     log.info("Instantiating plugins...")
@@ -104,7 +112,9 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
 
     # Init lightning trainer
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
-    trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger, plugins=plugins)
+    trainer: Trainer = hydra.utils.instantiate(
+        cfg.trainer, callbacks=callbacks, logger=logger, plugins=plugins
+    )
 
     # Send parameters from cfg to all lightning loggers
     object_dict = {
@@ -140,7 +150,9 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
         log.info("Starting testing!")
         ckpt_path = getattr(trainer.checkpoint_callback, "best_model_path", "")
         if ckpt_path == "":
-            log.warning("Best ckpt not found! Using current weights for testing...")
+            log.warning(
+                "Best ckpt not found! Using current weights for testing..."
+            )
             ckpt_path = None
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
         log.info(f"Best ckpt path: {ckpt_path}")
@@ -170,7 +182,9 @@ def main(cfg: DictConfig) -> Optional[float]:
     metric_dict, _ = train(cfg)
 
     # safely retrieve metric value for hydra-based hyperparameter optimization
-    metric_value = utils.get_metric_value(metric_dict=metric_dict, metric_name=cfg.get("optimized_metric"))
+    metric_value = utils.get_metric_value(
+        metric_dict=metric_dict, metric_name=cfg.get("optimized_metric")
+    )
 
     # return optimized metric
     return metric_value

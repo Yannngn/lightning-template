@@ -13,7 +13,9 @@ def test_mnist_datamodule(batch_size: int, cfg_train: DictConfig):
     with open_dict(cfg_train):
         cfg_train.datamodule.loaders.train.batch_size = batch_size
 
-    datamodule: MNISTDataModule = hydra.utils.instantiate(cfg_train.datamodule, _recursive_=False)
+    datamodule: MNISTDataModule = hydra.utils.instantiate(
+        cfg_train.datamodule, _recursive_=False
+    )
     datamodule.prepare_data()
 
     assert not datamodule.train_set

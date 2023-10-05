@@ -22,7 +22,9 @@ def serialize_tf_events(tf_events_file_path: str) -> Any:
             yield event
 
 
-def load_tf_events(tf_events_file_path: str, names: List[str]) -> Dict[str, Any]:
+def load_tf_events(
+    tf_events_file_path: str, names: List[str]
+) -> Dict[str, Any]:
     traces = defaultdict(list)
     for event in serialize_tf_events(tf_events_file_path):
         for value in event.summary.value:
@@ -49,7 +51,8 @@ def load_metrics(
     if verbose:
         print(
             f"lead_trace: {lead_trace}:",
-            f"argmax idx: {idx} / {len(lead_trace_value)}, " f"argmax value: {lead_trace_value[idx]}",
+            f"argmax idx: {idx} / {len(lead_trace_value)}, "
+            f"argmax value: {lead_trace_value[idx]}",
         )
         if sub_traces:
             for trace_name in sub_traces:

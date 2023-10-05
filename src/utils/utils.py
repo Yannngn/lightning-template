@@ -86,7 +86,9 @@ def extras(cfg: DictConfig) -> None:
 
     # disable python warnings
     if cfg.extras.get("ignore_warnings"):
-        log.info("Disabling python warnings! <cfg.extras.ignore_warnings=True>")
+        log.info(
+            "Disabling python warnings! <cfg.extras.ignore_warnings=True>"
+        )
         warnings.filterwarnings("ignore")
 
     # prompt user to input tags from command line if none are provided in the config
@@ -96,7 +98,9 @@ def extras(cfg: DictConfig) -> None:
 
     # pretty print config tree using Rich library
     if cfg.extras.get("print_config"):
-        log.info("Printing config tree with Rich! <cfg.extras.print_config=True>")
+        log.info(
+            "Printing config tree with Rich! <cfg.extras.print_config=True>"
+        )
         rich_utils.print_config_tree(cfg, resolve=True, save_to_file=True)
 
 
@@ -179,8 +183,12 @@ def log_hyperparameters(object_dict: dict) -> None:
 
     # save number of model parameters
     hparams["module/params/total"] = sum(p.numel() for p in model.parameters())
-    hparams["module/params/trainable"] = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    hparams["module/params/non_trainable"] = sum(p.numel() for p in model.parameters() if not p.requires_grad)
+    hparams["module/params/trainable"] = sum(
+        p.numel() for p in model.parameters() if p.requires_grad
+    )
+    hparams["module/params/non_trainable"] = sum(
+        p.numel() for p in model.parameters() if not p.requires_grad
+    )
 
     hparams["datamodule"] = cfg["datamodule"]
     hparams["trainer"] = cfg["trainer"]
@@ -282,7 +290,9 @@ def instantiate_plugins(cfg: DictConfig) -> Optional[List[Any]]:
 
 def get_args_parser() -> argparse.ArgumentParser:
     """Get parser for additional Hydra's command line flags."""
-    parser = argparse.ArgumentParser(description="Additional Hydra's command line flags parser.")
+    parser = argparse.ArgumentParser(
+        description="Additional Hydra's command line flags parser."
+    )
 
     parser.add_argument(
         "--config-path",
@@ -311,7 +321,9 @@ def get_args_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def register_custom_resolvers(version_base: str, config_path: str, config_name: str) -> Callable:
+def register_custom_resolvers(
+    version_base: str, config_path: str, config_name: str
+) -> Callable:
     """Optional decorator to register custom OmegaConf resolvers. It is
     excepted to call before `hydra.main` decorator call.
 
@@ -344,8 +356,12 @@ def register_custom_resolvers(version_base: str, config_path: str, config_name: 
 
     # register of replace resolver
     if not OmegaConf.has_resolver("replace"):
-        with initialize_config_dir(version_base=version_base, config_dir=config_path):
-            cfg = compose(config_name=config_name, return_hydra_config=True, overrides=[])
+        with initialize_config_dir(
+            version_base=version_base, config_dir=config_path
+        ):
+            cfg = compose(
+                config_name=config_name, return_hydra_config=True, overrides=[]
+            )
         cfg_tmp = cfg.copy()
         loss = load_loss(cfg_tmp.module.network.loss)
         metric, _, _ = load_metrics(cfg_tmp.module.network.metrics)
@@ -353,9 +369,9 @@ def register_custom_resolvers(version_base: str, config_path: str, config_name: 
 
         OmegaConf.register_new_resolver(
             "replace",
-            lambda item: item.replace("__loss__", loss.__class__.__name__).replace(
-                "__metric__", metric.__class__.__name__
-            ),
+            lambda item: item.replace(
+                "__loss__", loss.__class__.__name__
+            ).replace("__metric__", metric.__class__.__name__),
         )
 
     def decorator(function: Callable) -> Callable:
