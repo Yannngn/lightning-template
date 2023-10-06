@@ -2,10 +2,10 @@ from pathlib import Path
 from subprocess import check_output, run  # nosec B404, B603, B607
 
 import comet_ml
-import pytorch_lightning as pl
+import lightning.pytorch as pl
+from lightning.pytorch import Callback, Trainer
+from lightning.pytorch.loggers.comet import CometLogger
 from lightning_utilities.core.rank_zero import rank_zero_only
-from pytorch_lightning import Callback, Trainer
-from pytorch_lightning.loggers.comet import CometLogger
 
 
 def get_comet_logger(trainer: Trainer) -> CometLogger:

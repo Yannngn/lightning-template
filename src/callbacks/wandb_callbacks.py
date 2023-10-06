@@ -3,10 +3,10 @@ from subprocess import check_output, run  # nosec B404, B603, B607
 
 import torch
 import wandb
+from lightning.pytorch import Callback, Trainer
+from lightning.pytorch.callbacks import Checkpoint
+from lightning.pytorch.loggers.wandb import WandbLogger
 from lightning_utilities.core.rank_zero import rank_zero_only
-from pytorch_lightning import Callback, Trainer
-from pytorch_lightning.callbacks import Checkpoint
-from pytorch_lightning.loggers.wandb import WandbLogger
 
 
 def get_wandb_logger(trainer: Trainer) -> WandbLogger:

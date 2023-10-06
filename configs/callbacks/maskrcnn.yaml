@@ -1,7 +1,7 @@
 # this config file is used for running the template default tests
 
 model_checkpoint:
-  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  _target_: lightning.pytorch.callbacks.ModelCheckpoint
   dirpath: ${paths.output_dir}/checkpoints # directory to save the model file
   filename: ${replace:"epoch{epoch:03d}-loss_train{__loss__/train:.4f}-metric_train{__metric__/train:.4f}"} # checkpoint filename
   monitor: ${replace:"__loss__/train"} # name of the logged metric which determines when model is improving
@@ -17,7 +17,7 @@ model_checkpoint:
   save_on_train_epoch_end: true # whether to run checkpointing at the end of the training epoch or the end of validation
 
 early_stopping:
-  _target_: pytorch_lightning.callbacks.EarlyStopping
+  _target_: lightning.pytorch.callbacks.EarlyStopping
   monitor: ${replace:"__loss__/train"} # quantity to be monitored, must be specified !!!
   min_delta: 5.0e-5 # minimum change in the monitored quantity to qualify as an improvement
   patience: 15 # number of checks with no improvement after which training will be stopped
@@ -30,8 +30,8 @@ early_stopping:
   check_on_train_epoch_end: null # whether to run early stopping at the end of the training epoch
 
 model_summary:
-  _target_: pytorch_lightning.callbacks.RichModelSummary
+  _target_: lightning.pytorch.callbacks.RichModelSummary
   max_depth: 1 # the maximum depth of layer nesting that the summary will include
 
 rich_progress_bar:
-  _target_: pytorch_lightning.callbacks.RichProgressBar
+  _target_: lightning.pytorch.callbacks.RichProgressBar

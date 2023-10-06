@@ -65,7 +65,7 @@ class DetectionLitModule(BaseLitModule):
 
         return {"loss": loss}
 
-    def training_epoch_end(self, outputs: List[Any]) -> None:
+    def on_train_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
     def validation_step(self, batch: BatchType, batch_idx: int) -> Any:
@@ -100,7 +100,7 @@ class DetectionLitModule(BaseLitModule):
         self.log_dict(self.valid_extra_metrics, **self.logging_params)  # type: ignore
         return {"loss": loss, "preds": outputs, "targets": targets}
 
-    def validation_epoch_end(self, outputs: List[Any]) -> None:
+    def on_validation_epoch_end(self, outputs: List[Any]) -> None:
         valid_metric = self.valid_metric.compute()
         self.valid_metric_best(valid_metric)
 
@@ -143,7 +143,7 @@ class DetectionLitModule(BaseLitModule):
         self.log_dict(self.test_extra_metrics, **self.logging_params)  # type: ignore
         return {"loss": loss, "preds": outputs, "targets": targets}
 
-    def test_epoch_end(self, outputs: List[Any]) -> None:
+    def on_test_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
     def predict_step(

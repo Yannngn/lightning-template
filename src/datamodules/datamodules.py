@@ -2,8 +2,8 @@ from collections import OrderedDict
 from typing import Dict, List, Optional, Union
 
 import hydra
+from lightning.pytorch import LightningDataModule
 from omegaconf import DictConfig
-from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
 from src.datamodules.components.transforms import TransformsWrapper

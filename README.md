@@ -211,7 +211,7 @@ By default, API has the following methods:
 ```python
 from typing import Any, Dict, List, Optional, Union
 from torch.utils.data import DataLoader, Dataset
-from pytorch_lightning import LightningDataModule
+from lightning.pytorch import LightningDataModule
 
 
 class YourDataModule(LightningDataModule):
@@ -300,11 +300,11 @@ Minimum API has the following methods:
 Also, you can override optional methods for each step to perform additional logic:
 
 - `training_step_end`: training step end operations
-- `training_epoch_end`: training epoch end operations
+- `on_train_epoch_end`: training epoch end operations
 - `validation_step_end`: validation step end operations
-- `validation_epoch_end`: validation epoch end operations
+- `on_validation_epoch_end`: validation epoch end operations
 - `test_step_end`: test step end operations
-- `test_epoch_end`: test epoch end operations
+- `on_test_epoch_end`: test epoch end operations
 
 <details>
 
@@ -312,7 +312,7 @@ Also, you can override optional methods for each step to perform additional logi
 
 ```python
 from typing import Any
-from pytorch_lightning import LightningModule
+from lightning.pytorch import LightningModule
 
 
 class LitModel(LightningModule):
@@ -329,7 +329,7 @@ class LitModel(LightningModule):
     def training_step_end(self, step_output: Any):
         ...
 
-    def training_epoch_end(self, outputs: Any):
+    def on_train_epoch_end(self, outputs: Any):
         ...
 
     def validation_step(self, *args: Any, **kwargs: Any):
@@ -338,7 +338,7 @@ class LitModel(LightningModule):
     def validation_step_end(self, step_output: Any):
         ...
 
-    def validation_epoch_end(self, outputs: Any):
+    def on_validation_epoch_end(self, outputs: Any):
         ...
 
     def test_step(self, *args: Any, **kwargs: Any):
@@ -347,7 +347,7 @@ class LitModel(LightningModule):
     def test_step_end(self, step_output: Any):
         ...
 
-    def test_epoch_end(self, outputs: Any):
+    def on_test_epoch_end(self, outputs: Any):
         ...
 
     def configure_optimizers(self):

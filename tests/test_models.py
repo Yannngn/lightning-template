@@ -13,13 +13,9 @@ from src.modules.models.module import (
 
 _MODULE_SOURCE = (
     {"model_name": "torchvision.models/resnet18", "weights": None},
-    {"model_name": "timm/tf_efficientnetv2_s", "pretrained": False},
     {
-        "model_name": "segmentation_models_pytorch/DeepLabV3Plus",
-        "encoder_name": "resnet34",
-        "encoder_weights": None,
-        "in_channels": 3,
-        "classes": 10,
+        "model_name": "torchvision.models.segmentation/deeplabv3_resnet50",
+        "num_classes": 3,
     },
     # In pytest torch.hub.load does not work correct when torchvision is installed
     # https://discuss.pytorch.org/t/problem-with-loading-models-from-torch-hub-pytorch-vision-in-pytest/170320

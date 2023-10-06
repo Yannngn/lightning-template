@@ -3,8 +3,8 @@ from typing import Dict, List, Optional, Union
 
 import hydra
 import torch
+from lightning.pytorch import LightningDataModule
 from omegaconf import DictConfig
-from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, Subset
 
 from src.datamodules.components.transforms import TransformsWrapper

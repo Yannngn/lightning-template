@@ -12,22 +12,6 @@ _TEST_LOSS_CFG = (
         "num_classes": 10,
     },
     {"_target_": "src.modules.losses.FocalLoss"},
-    {
-        "_target_": "segmentation_models_pytorch.losses.DiceLoss",
-        "mode": "binary",
-    },
-    {
-        "_target_": "segmentation_models_pytorch.losses.FocalLoss",
-        "mode": "binary",
-    },
-    {
-        "_target_": "segmentation_models_pytorch.losses.JaccardLoss",
-        "mode": "binary",
-    },
-    {
-        "_target_": "segmentation_models_pytorch.losses.LovaszLoss",
-        "mode": "binary",
-    },
     {"_target_": "torch.nn.BCEWithLogitsLoss"},
     {"_target_": "torch.nn.BCEWithLogitsLoss", "pos_weight": (2.0,)},
     {"_target_": "torch.nn.BCEWithLogitsLoss", "pos_weight": (0.5,)},

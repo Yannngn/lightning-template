@@ -15,7 +15,7 @@ ssl:
 # grammar problems with hydra config parser.
 
 model_checkpoint:
-  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  _target_: lightning.pytorch.callbacks.ModelCheckpoint
   monitor: ${replace:"__loss__/valid"}
   mode: "min" # "min" means lower loss value is better
   save_top_k: 5
@@ -26,7 +26,7 @@ model_checkpoint:
   auto_insert_metric_name: False
 
 early_stopping:
-  _target_: pytorch_lightning.callbacks.EarlyStopping
+  _target_: lightning.pytorch.callbacks.EarlyStopping
   monitor: ${replace:"__loss__/valid"}
   mode: "min" # "min" means lower loss value is better
   patience: 15

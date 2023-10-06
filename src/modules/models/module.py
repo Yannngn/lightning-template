@@ -1,8 +1,6 @@
 from functools import reduce
 from typing import Any, List, Optional, Union
 
-import segmentation_models_pytorch as seg_models
-import timm
 import torch
 import torchvision.models as models
 
@@ -128,8 +126,6 @@ class BaseModule(torch.nn.Module):
         Available models registries:
 
         - torchvision.models
-        - segmentation_models_pytorch
-        - timm
         - torch.hub
 
         Args:
@@ -141,16 +137,16 @@ class BaseModule(torch.nn.Module):
 
         super().__init__()
         if "torchvision.models" in model_name:
-            model_name = model_name.split("torchvision.models/")[1]
-            self.model = getattr(models, model_name)(**kwargs)
-        elif "segmentation_models_pytorch" in model_name:
-            model_name = model_name.split("segmentation_models_pytorch/")[1]
-            self.model = getattr(seg_models, model_name)(**kwargs)
-        elif "timm" in model_name:
-            model_name = model_name.split("timm/")[1]
-            self.model = timm.create_model(model_name, **kwargs)
-        elif "torch.hub" in model_name:
-            model_name = model_name.split("torch.hub/")[1]
+            if "segmentation" in model_name:
+                model_name = model_name.split(
+                    "torchvision.models.segmentation/"
+                )[1]
+                self.model = getattr(models.segmentation, model_name)(**kwargs)
+            else:
+                model_name = model_name.split("torchvision.models/")[1]
+                self.model = getattr(models, model_name)(**kwargs)
+        elif "torch.hub/" in model_name:
+            model_name = model_name.split("/")[1]
             if not model_repo:
                 raise ValueError("Please provide model_repo for torch.hub")
             self.model = torch.hub.load(model_repo, model_name, **kwargs)
@@ -163,10 +159,6 @@ class BaseModule(torch.nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.model(x)
         return x
-
-    @staticmethod
-    def get_timm_list_models(*args: Any, **kwargs: Any) -> List[str]:
-        return timm.list_models(*args, **kwargs)
 
     @staticmethod
     def get_torch_hub_list_models(

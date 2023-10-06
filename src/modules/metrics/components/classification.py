@@ -1,7 +1,7 @@
 from typing import Optional
 
 import torch
-from pytorch_lightning.utilities import FLOAT32_EPSILON
+from lightning.pytorch.utilities import FLOAT32_EPSILON
 from torchmetrics import Metric
 
 

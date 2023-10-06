@@ -2,15 +2,15 @@ from typing import Any, List, Optional, Tuple
 
 import hydra
 import pyrootutils
-from omegaconf import DictConfig
-from pytorch_lightning import (
+from lightning.pytorch import (
     Callback,
     LightningDataModule,
     LightningModule,
     Trainer,
     seed_everything,
 )
-from pytorch_lightning.loggers import LightningLoggerBase
+from lightning.pytorch.loggers import Logger
+from omegaconf import DictConfig
 
 root = pyrootutils.setup_root(
     search_from=__file__,
@@ -102,9 +102,7 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
 
     # Init loggers
     log.info("Instantiating loggers...")
-    logger: List[LightningLoggerBase] = utils.instantiate_loggers(
-        cfg.get("logger")
-    )
+    logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))
 
     # Init lightning ddp plugins
     log.info("Instantiating plugins...")

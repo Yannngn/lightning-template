@@ -28,8 +28,8 @@ class MultipleLitModule(BaseLitModule):
             scheduler (DictConfig): Scheduler config.
             logging (DictConfig): Logging config.
             heads: (DictConfig): List of output heads names.
-            args (Any): Additional arguments for pytorch_lightning.LightningModule.
-            kwargs (Any): Additional keyword arguments for pytorch_lightning.LightningModule.
+            args (Any): Additional arguments for lightning.pytorch.LightningModule.
+            kwargs (Any): Additional keyword arguments for lightning.pytorch.LightningModule.
         """
 
         super().__init__(
@@ -100,7 +100,7 @@ class MultipleLitModule(BaseLitModule):
         )
         return {"loss": loss}
 
-    def training_epoch_end(self, outputs: List[Any]) -> None:
+    def on_train_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
     def validation_step(
@@ -122,7 +122,7 @@ class MultipleLitModule(BaseLitModule):
         self.total_valid_metric.update(preds, targets)
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def validation_epoch_end(self, outputs: List[Any]) -> None:
+    def on_validation_epoch_end(self, outputs: List[Any]) -> None:
         total_valid_metric = self.total_valid_metric.compute()
         self.total_valid_metric_best(total_valid_metric)
         self.log(
@@ -149,7 +149,7 @@ class MultipleLitModule(BaseLitModule):
         self.log_metrics("test", head, preds, targets)
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def test_epoch_end(self, outputs: List[Any]) -> None:
+    def on_test_epoch_end(self, outputs: List[Any]) -> None:
         pass
 
     def predict_step(

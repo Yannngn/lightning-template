@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, List, Optional, Union
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
+from lightning.pytorch import LightningModule, Trainer
 
 from src.utils import pylogger
 
