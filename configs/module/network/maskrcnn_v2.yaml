@@ -1,0 +1,23 @@
+# this config file is used for running the template default tests
+
+model:
+  _target_: src.modules.models.maskrcnn.MaskRCNNV2Module
+  finetune: true
+  weights: null
+  num_classes: 2
+  backbone_weights: null
+  trainable_backbone_layers: null
+
+loss:
+  _target_: torch.nn.CrossEntropyLoss
+
+metrics:
+  main:
+    _target_: src.modules.metrics.components.detection.IoU
+    num_classes: 2
+    dist_sync_on_step: false
+    dist_reduce_fx: sum
+  valid_best:
+    _target_: torchmetrics.MaxMetric
+
+output_activation: null

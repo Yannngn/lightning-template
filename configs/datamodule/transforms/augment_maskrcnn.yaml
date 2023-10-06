@@ -1,0 +1,18 @@
+train:
+  order: ["affine"]
+  affine:
+    _target_: albumentations.Affine
+    scale: [0.85, 1.15]
+    translate_percent: [-0.05, 0.05]
+    rotate: [-5, 5]
+    shear: [-5, 5]
+    interpolation: 1
+    mask_interpolation: 0
+    mode:
+      _target_: cv2.BORDER_REFLECT
+    keep_ratio: True
+    rotate_method: largest_box
+    p: 0.8
+
+valid_test_predict:
+  order: null

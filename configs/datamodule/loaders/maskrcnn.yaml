@@ -1,0 +1,33 @@
+train_test_split: 0.1
+
+collate_fn:
+  _target_: src.utils.utils.maskrcnn_collate_fn
+  _partial_: true
+
+train:
+  batch_size: 1
+  shuffle: True
+  num_workers: 8
+  drop_last: True
+  pin_memory: True
+
+valid:
+  batch_size: 2
+  shuffle: False
+  num_workers: 8
+  drop_last: False
+  pin_memory: True
+
+test:
+  batch_size: 2
+  shuffle: False
+  num_workers: 8
+  drop_last: False
+  pin_memory: True
+
+predict:
+  batch_size: 2
+  shuffle: False
+  num_workers: 8
+  drop_last: False
+  pin_memory: True

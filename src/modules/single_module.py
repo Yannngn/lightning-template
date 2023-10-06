@@ -227,7 +227,7 @@ class SingleVicRegLitModule(BaseLitModule):
         self.loss = load_loss(network.loss)
         # projector
         self.projector = nn.Sequential(
-            nn.Linear(self.model.features_dim, proj_hidden_dim),
+            nn.Linear(self.model.features_dim, proj_hidden_dim),  # type: ignore
             nn.BatchNorm1d(proj_hidden_dim),
             nn.ReLU(),
             # nn.Linear(proj_hidden_dim, proj_hidden_dim),

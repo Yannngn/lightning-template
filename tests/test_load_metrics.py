@@ -12,7 +12,7 @@ _TEST_METRICS_CFG = (
     {"_target_": "torchmetrics.AveragePrecision", "task": "binary"},
     {"_target_": "torchmetrics.JaccardIndex", "task": "binary"},
     {"_target_": "src.modules.metrics.Accuracy"},
-    {"_target_": "src.modules.metrics.IoU", "n_class": 2},
+    {"_target_": "src.modules.metrics.IoU", "num_classes": 2},
     {"_target_": "src.modules.metrics.NDCG"},
     {"_target_": "src.modules.metrics.MRR"},
     {"_target_": "src.modules.metrics.SentiMRR"},
@@ -52,7 +52,7 @@ _TEST_METRICS_CFG_COMPLEX = (
         "additional": {
             "IoU": {
                 "_target_": "src.modules.metrics.IoU",
-                "n_class": 2,
+                "num_classes": 2,
             },
         },
     },

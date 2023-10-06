@@ -28,9 +28,9 @@ class BaseLitModule(LightningModule):
         """
 
         super().__init__(*args, **kwargs)
-        self.model = hydra.utils.instantiate(network.model)
-        self.opt_params = optimizer
-        self.slr_params = scheduler
+        self.model: torch.nn.Module = hydra.utils.instantiate(network.model)
+        self.optimizer_params = optimizer
+        self.scheduler_params = scheduler
         self.logging_params = logging
 
     def forward(self, x: Any) -> Any:
@@ -38,19 +38,24 @@ class BaseLitModule(LightningModule):
 
     def configure_optimizers(self) -> Any:
         optimizer: torch.optim.Optimizer = hydra.utils.instantiate(
-            self.opt_params, params=self.parameters(), _convert_="partial"
+            self.optimizer_params,
+            params=self.parameters(),
+            _convert_="partial",
         )
-        if self.slr_params.get("scheduler"):
-            scheduler: torch.optim.lr_scheduler._LRScheduler = (
-                hydra.utils.instantiate(
-                    self.slr_params.scheduler,
-                    optimizer=optimizer,
-                    _convert_="partial",
-                )
+
+        if params := self.scheduler_params.get("scheduler"):
+            scheduler: torch.optim.lr_scheduler.LRScheduler = hydra.utils.instantiate(
+                params,
+                optimizer=optimizer,
+                _convert_="partial",
             )
+
             lr_scheduler_dict = {"scheduler": scheduler}
-            if self.slr_params.get("extras"):
-                for key, value in self.slr_params.get("extras").items():
+
+            if extra_params := self.scheduler_params.get("extras"):
+                for key, value in extra_params.items():
                     lr_scheduler_dict[key] = value
+
             return {"optimizer": optimizer, "lr_scheduler": lr_scheduler_dict}
+
         return {"optimizer": optimizer}

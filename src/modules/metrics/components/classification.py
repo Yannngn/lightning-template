@@ -17,7 +17,7 @@ class Accuracy(Metric):
 
     def update(self, preds: torch.Tensor, targets: torch.Tensor) -> None:
         diff = preds.argmax(dim=1).eq(targets)
-        self.correct += diff.sum()  # type: ignore
+        self.correct += diff.sum()
         self.total += targets.numel()  # type: ignore
 
     def compute(self) -> torch.Tensor:
