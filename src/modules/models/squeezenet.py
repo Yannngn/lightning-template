@@ -31,10 +31,14 @@ class SqueezeNet1_1Module(BaseSqueezeNetModule):
         dropout: float = 0.5,
     ) -> None:
         if not finetune:
-            super().__init__(weights=weights, num_classes=num_classes, dropout=dropout)
+            super().__init__(
+                weights=weights, num_classes=num_classes, dropout=dropout
+            )
             return
 
-        assert num_classes is not None, "if finetuning num_classes must be an integer"
+        assert (
+            num_classes is not None
+        ), "if finetuning num_classes must be an integer"
 
         weights = weights or SqueezeNet1_1_Weights.DEFAULT
 
@@ -51,5 +55,7 @@ class SqueezeNet1_1Module(BaseSqueezeNetModule):
 
         if trainable_feature_layers:
             trainable_feature_layers *= -1
-            for param in self.model.features[trainable_feature_layers:-1].parameters():
+            for param in self.model.features[
+                trainable_feature_layers:-1
+            ].parameters():
                 param.requires_grad = True

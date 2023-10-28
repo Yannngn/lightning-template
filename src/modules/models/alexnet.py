@@ -13,7 +13,9 @@ class BaseAlexNetModule(nn.Module):
     ) -> None:
         super().__init__()
 
-        self.model = alexnet(weights=weights, num_classes=num_classes, dropout=dropout)
+        self.model = alexnet(
+            weights=weights, num_classes=num_classes, dropout=dropout
+        )
 
     def forward(self, x: Tensor) -> Tensor:
         return self.model(x)
@@ -36,7 +38,9 @@ class AlexNetModule(BaseAlexNetModule):
             )
             return
 
-        assert num_classes is not None, "if finetuning num_classes must be an integer"
+        assert (
+            num_classes is not None
+        ), "if finetuning num_classes must be an integer"
 
         weights = AlexNet_Weights.DEFAULT or weights
         classifier_dims = classifier_dims or (4096, 4096)

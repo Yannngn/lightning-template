@@ -57,10 +57,14 @@ class MaskRCNNV2Module(BaseMaskRCNNV2Module):
             )
             return
 
-        assert num_classes is not None, "if finetuning num_classes must be an integer"
+        assert (
+            num_classes is not None
+        ), "if finetuning num_classes must be an integer"
 
         weights = (
-            MaskRCNN_ResNet50_FPN_V2_Weights.DEFAULT if weights is None else weights
+            MaskRCNN_ResNet50_FPN_V2_Weights.DEFAULT
+            if weights is None
+            else weights
         )
 
         super().__init__(

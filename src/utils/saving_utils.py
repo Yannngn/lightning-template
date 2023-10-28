@@ -76,7 +76,9 @@ def save_state_dicts(
     log.info(f"Last ckpt state dict saved to: {path}")
 
     # save state dict for best checkpoint
-    best_ckpt_path = getattr(trainer.checkpoint_callback, "best_model_path", "")
+    best_ckpt_path = getattr(
+        trainer.checkpoint_callback, "best_model_path", ""
+    )
     if best_ckpt_path == "":
         log.warning("Best ckpt not found! Skipping...")
         return
@@ -99,7 +101,9 @@ def save_state_dicts(
     log.info(f"Best ckpt state dict saved to: {path}")
 
 
-def save_predictions_from_dataloader(predictions: List[Any], path: Path) -> None:
+def save_predictions_from_dataloader(
+    predictions: List[Any], path: Path
+) -> None:
     """Save predictions returned by `Trainer.predict` method for single
     dataloader.
 
@@ -176,12 +180,15 @@ def save_predictions(
     elif isinstance(predictions[0], list):
         for idx, predictions_idx in enumerate(predictions):
             if not predictions_idx:
-                log.warning(f"Predictions for DataLoader #{idx} is empty! Skipping...")
+                log.warning(
+                    f"Predictions for DataLoader #{idx} is empty! Skipping..."
+                )
                 continue
             target_path = path / f"predictions_{idx}.{output_format}"
             save_predictions_from_dataloader(predictions_idx, target_path)
             log.info(
-                f"Saved predictions for DataLoader #{idx} to: " f"{str(target_path)}"
+                f"Saved predictions for DataLoader #{idx} to: "
+                f"{str(target_path)}"
             )
         return
 

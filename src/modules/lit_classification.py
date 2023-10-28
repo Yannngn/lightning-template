@@ -21,7 +21,9 @@ class ClassificationLitModule(BaseLitModule):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(network, optimizer, scheduler, logging, *args, **kwargs)
+        super().__init__(
+            network, optimizer, scheduler, logging, *args, **kwargs
+        )
         self.loss = load_loss(network.get("loss"))
         self.output_activation = hydra.utils.instantiate(
             network.get("output_activation"), _partial_=True
@@ -63,7 +65,9 @@ class ClassificationLitModule(BaseLitModule):
     def on_train_start(self) -> None:
         self.valid_metric_best.reset()
 
-    def training_step(self, batch: BatchType, batch_idx: int) -> Dict[str, Any]:
+    def training_step(
+        self, batch: BatchType, batch_idx: int
+    ) -> Dict[str, Any]:
         self.model.train()
 
         loss, preds, targets = self.model_step(batch, batch_idx)
@@ -150,7 +154,9 @@ class MNISTLitModule(ClassificationLitModule):
 
         return loss, preds, y
 
-    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def predict_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
         x, y = batch
         logits = self.forward(x["image"].permute(0, 3, 1, 2))
         preds = self.output_activation(logits)

@@ -17,9 +17,9 @@ def get_iou(masks_1: torch.Tensor, masks_2: torch.Tensor) -> torch.Tensor:
         A tensor of IoU scores with shape (N, M).
     """
     print(masks_1.shape)
-    intersection = ((masks_1.unsqueeze(1) > 0) & (masks_2.unsqueeze(0) > 0)).sum(
-        dim=(2, 3)
-    )
+    intersection = (
+        (masks_1.unsqueeze(1) > 0) & (masks_2.unsqueeze(0) > 0)
+    ).sum(dim=(2, 3))
     union = ((masks_1.unsqueeze(1) > 0) | (masks_2.unsqueeze(0) > 0)).sum(
         dim=(2, 3)
     ) + FLOAT32_EPSILON
@@ -81,9 +81,15 @@ class DetectionCM(Metric):
     ) -> None:
         super().__init__(dist_sync_on_step=dist_sync_on_step)
         self.num_classes = num_classes
-        self.add_state("tp", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx)
-        self.add_state("fp", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx)
-        self.add_state("fn", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx)
+        self.add_state(
+            "tp", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx
+        )
+        self.add_state(
+            "fp", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx
+        )
+        self.add_state(
+            "fn", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx
+        )
 
     def update(
         self,
