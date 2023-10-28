@@ -3,7 +3,7 @@
 # --------- pytorch --------- #
 torch>=2.1.0
 torchvision>=0.16.0
-pytorch-lightning==2.0.9.post0
+lightning==2.1.0
 torchmetrics==1.2.0
 
 # --------- hydra --------- #
@@ -25,7 +25,7 @@ pytest
 sh; platform_system != 'Windows'
 omegaconf
 tqdm
-tensorflow
+tensorflow[and-cuda]
 pynvml
 
 # --------- data --------- #

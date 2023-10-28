@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, TypeAlias
+from typing import Any, Dict, List, Optional, Tuple, TypeAlias, Union
 
 from torch import Tensor, nn
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
@@ -12,10 +12,8 @@ from torchvision.models.resnet import ResNet50_Weights
 BatchType: TypeAlias = Tuple[
     List[Tensor], List[Dict[str, Tensor]], List[Tuple[Any, ...]]
 ]
-
-EvalOutput: TypeAlias = List[Dict[str, Tensor]]
-
 TrainOutput: TypeAlias = Dict[str, Tensor]
+EvalOutput: TypeAlias = List[Dict[str, Tensor]]
 
 
 class BaseMaskRCNNV2Module(nn.Module):
@@ -35,7 +33,9 @@ class BaseMaskRCNNV2Module(nn.Module):
             trainable_backbone_layers=trainable_backbone_layers,
         )
 
-    def forward(self, x, y=None) -> list[dict[str, Tensor]]:
+    def forward(
+        self, x: List[Tensor], y: Optional[EvalOutput] = None
+    ) -> Union[TrainOutput, EvalOutput]:
         return self.model(x, y)
 
 
@@ -57,14 +57,10 @@ class MaskRCNNV2Module(BaseMaskRCNNV2Module):
             )
             return
 
-        assert (
-            num_classes is not None
-        ), "if finetuning num_classes must be an integer"
+        assert num_classes is not None, "if finetuning num_classes must be an integer"
 
         weights = (
-            MaskRCNN_ResNet50_FPN_V2_Weights.DEFAULT
-            if weights is None
-            else weights
+            MaskRCNN_ResNet50_FPN_V2_Weights.DEFAULT if weights is None else weights
         )
 
         super().__init__(

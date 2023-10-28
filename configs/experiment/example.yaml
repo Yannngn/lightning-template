@@ -24,11 +24,6 @@ trainer:
 module:
   optimizer:
     lr: 0.002
-  network:
-    model:
-      lin1_size: 128
-      lin2_size: 256
-      lin3_size: 64
 
 datamodule:
   loaders:

@@ -1,7 +1,6 @@
 import platform
 
 import pkg_resources
-from lightning.pytorch.accelerators.tpu import TPUAccelerator
 
 
 def _package_available(package_name: str) -> bool:
@@ -12,7 +11,7 @@ def _package_available(package_name: str) -> bool:
         return False
 
 
-_TPU_AVAILABLE = TPUAccelerator.is_available()
+_TPU_AVAILABLE = False
 
 _IS_WINDOWS = platform.system() == "Windows"
 

@@ -16,14 +16,14 @@ def get_iou(masks_1: torch.Tensor, masks_2: torch.Tensor) -> torch.Tensor:
     Returns:
         A tensor of IoU scores with shape (N, M).
     """
-
-    intersection = (
-        (masks_1.unsqueeze(1) > 0) & (masks_2.unsqueeze(0) > 0)
-    ).sum(dim=(2, 3))
+    print(masks_1.shape)
+    intersection = ((masks_1.unsqueeze(1) > 0) & (masks_2.unsqueeze(0) > 0)).sum(
+        dim=(2, 3)
+    )
     union = ((masks_1.unsqueeze(1) > 0) | (masks_2.unsqueeze(0) > 0)).sum(
         dim=(2, 3)
     ) + FLOAT32_EPSILON
-
+    print(intersection.shape)
     return intersection / union
 
 
@@ -81,15 +81,9 @@ class DetectionCM(Metric):
     ) -> None:
         super().__init__(dist_sync_on_step=dist_sync_on_step)
         self.num_classes = num_classes
-        self.add_state(
-            "tp", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx
-        )
-        self.add_state(
-            "fp", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx
-        )
-        self.add_state(
-            "fn", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx
-        )
+        self.add_state("tp", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx)
+        self.add_state("fp", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx)
+        self.add_state("fn", default=torch.tensor(0.0), dist_reduce_fx=dist_reduce_fx)
 
     def update(
         self,
@@ -98,24 +92,19 @@ class DetectionCM(Metric):
     ) -> None:
         tp = fn = fp = 0
         for image_pred, image_target in zip(predictions, targets):
-            pred = image_pred["masks"]
-            pred_labels = image_pred["labels"].detach().cpu()
-            target = image_target["masks"]
-            target_labels = image_target["labels"].detach().cpu()
-
-            for index in range(1, self.num_classes + 1):
-                masks = pred[pred_labels == index].detach().cpu()
-                gts = target[target_labels == index].detach().cpu()
-
-                ious = get_iou(masks, gts)
-
-                tp += torch.sum(ious.max(dim=1)[1]).item()
-                fn += torch.eq(ious.max(dim=0)[0], 0).sum().item()
-                fp += (ious > 0).sum().item() - tp
+            masks = image_pred["masks"].detach().cpu()
+            gts = image_target["masks"].detach().cpu()
+            print(masks.shape)
+            ious = get_iou(masks, gts)
+            print(ious.shape)
+            tp += torch.sum(ious.max(dim=1)[1]).item()
+            fn += torch.eq(ious.max(dim=0)[0], 0).sum().item()
+            fp += (ious > 0).sum().item() - tp
 
         self.tp += tp  # type: ignore
         self.fn += fn  # type: ignore
         self.fp += fp  # type: ignore
+        print(tp, fp, fn)
 
     def compute(self) -> torch.Tensor:
         ...
@@ -144,34 +133,38 @@ class DetectionF1(DetectionCM):
         return 2 * (precision * recall) / (precision + recall + FLOAT32_EPSILON)  # type: ignore
 
 
-# def main():
-#     def pseudo_masks(side, s):
-#         square = torch.ones((s, s))
+def main():
+    def pseudo_masks(side, s):
+        square = torch.ones((s, s))
 
-#         mask_1 = torch.zeros((side, side))
-#         mask_2 = torch.zeros((side, side))
-#         mask_3 = torch.zeros((side, side))
+        mask_1 = torch.zeros((2, side, side))
+        mask_2 = torch.zeros((2, side, side))
+        mask_3 = torch.zeros((2, side, side))
 
-#         mask_1[0:s, 0:s] = square
-#         mask_2[side - s : side, side - s : side] = square
-#         mask_3[side // 2 - s // 2 : side // 2 + s // 2, side // 2 - s // 2 : side // 2 + s // 2] = square
+        mask_1[1, 0:s, 0:s] = square
+        mask_2[1, side - s : side, side - s : side] = square
+        mask_3[
+            1,
+            side // 2 - s // 2 : side // 2 + s // 2,
+            side // 2 - s // 2 : side // 2 + s // 2,
+        ] = square
 
-#         return mask_1, mask_2, mask_3
+        return mask_1, mask_2, mask_3
 
-#     gt1, gt2, _ = pseudo_masks(256, 100)
+    gt1, gt2, _ = pseudo_masks(256, 100)
 
-#     x1, x2, gt3 = pseudo_masks(256, 10)
-#     m = torch.stack([gt1, gt2, x1, x2, torch.zeros((256, 256))])
-#     g = torch.stack([gt1, gt2, gt3])
+    x1, x2, gt3 = pseudo_masks(256, 10)
+    m = torch.stack([gt1, gt2, x1, x2, torch.zeros((2, 256, 256))])
+    g = torch.stack([gt1, gt2, gt3])
 
-#     preds = [{"masks": m, "labels": torch.tensor([1, 1, 1, 1, 1])}]
+    preds = [{"masks": m, "labels": torch.tensor([1, 1, 1, 1, 1])}]
 
-#     gts = [{"masks": g, "labels": torch.tensor([1, 1, 1])}]
+    gts = [{"masks": g, "labels": torch.tensor([1, 1, 1])}]
 
-#     accuracy = DetectionAccuracy(1)
-#     accuracy.update(preds, gts)
-#     print(accuracy.compute())
+    accuracy = DetectionAccuracy(1)
+    accuracy.update(preds, gts)
+    print(accuracy.compute())
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
