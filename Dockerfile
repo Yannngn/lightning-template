@@ -1,4 +1,4 @@
-ARG CUDA_VERSION="11.7.0"
+ARG CUDA_VERSION="11.8.0"
 ARG CUDNN_VERSION="8"
 ARG OS_VERSION="22.04"
 FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_VERSION}-runtime-ubuntu${OS_VERSION}
@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # --------------------------------- packages -------------------------------- #
 
 SHELL ["/bin/bash", "-c"]
-ARG PYTHON_VERSION="3.10"
+ARG PYTHON_VERSION="3.11"
 ARG PYTHON_MAJOR="3"
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
