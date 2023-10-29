@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, "release/*"]
 
+env:
+  PROJECT_ROOT: $PWD
+  DATA_DIR: ./data
+
 jobs:
   run_tests_ubuntu:
     runs-on: ${{ matrix.os }}
